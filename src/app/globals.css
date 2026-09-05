@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+/* ===== Warm Cultural Palette ===== */
+@theme {
+  --color-warm-bg: #F5EFE6;
+  --color-cream: #FAF7F2;
+  --color-sand: #E8DCCC;
+  --color-sand-dark: #D4C4A8;
+  --color-terracotta: #C4714F;
+  --color-terracotta-light: #E8956D;
+  --color-gold: #C9A227;
+  --color-gold-light: #E0B84A;
+  --color-teal: #1A5F7A;
+  --color-teal-dark: #0E3D4F;
+  --color-teal-light: #2A8FAF;
+  --color-dark: #2C1F14;
+  --color-dark-muted: #5C4A35;
+  --color-kaz-blue: #1A5F7A;
+  --color-kaz-gold: #C9A227;
+  --color-deep-blue: #F5EFE6;
+}
+
+/* ===== Base ===== */
+body {
+  background-color: #F5EFE6;
+  color: #2C1F14;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+/* ===== Kazakh ornament SVG background ===== */
+.kazakh-pattern {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cpath d='M40 10 L46 24 L60 24 L49 33 L53 47 L40 38 L27 47 L31 33 L20 24 L34 24 Z' fill='%23C9A227' fill-opacity='0.06'/%3E%3Cpath d='M10 40 L24 34 L24 20 L33 31 L47 27 L38 40 L47 53 L33 49 L24 60 L24 46 Z' fill='%23C9A227' fill-opacity='0.06'/%3E%3Cpath d='M70 40 L56 34 L56 20 L47 31 L33 27 L42 40 L33 53 L47 49 L56 60 L56 46 Z' fill='%23C9A227' fill-opacity='0.06'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+/* ===== Animations ===== */
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-down { animation: fade-in-down 0.4s ease-out both; }
+.animate-fade-in { animation: fade-in 0.5s ease-out both; }
+.animate-slide-in-left { animation: slide-in-left 0.4s ease-out both; }
+.animate-slide-in-up { animation: slide-in-up 0.4s ease-out both; }
+
+/* ===== Custom Scrollbar ===== */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201,162,39,0.4) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(201,162,39,0.4);
+  border-radius: 4px;
+}
+
+/* ===== Leaflet overrides ===== */
+.leaflet-container {
+  background: #E8DCCC;
+  font-family: 'Inter', Arial, sans-serif;
+}
+.leaflet-popup-content-wrapper {
+  background: #FFF8F0 !important;
+  border: 1px solid rgba(196,113,79,0.3) !important;
+  color: #2C1F14 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(44,31,20,0.15) !important;
+}
+.leaflet-popup-tip { background: #FFF8F0 !important; }
+.leaflet-popup-content { margin: 8px 12px !important; color: #2C1F14 !important; }
+.leaflet-control-zoom a {
+  background: rgba(255,248,240,0.95) !important;
+  color: #2C1F14 !important;
+  border: 1px solid rgba(196,113,79,0.3) !important;
+}
+.leaflet-control-zoom a:hover { background: rgba(201,162,39,0.2) !important; }
+.font-sans { font-family: 'Inter', Arial, sans-serif; }
