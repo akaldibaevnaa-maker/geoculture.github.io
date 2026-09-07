@@ -200,11 +200,11 @@ export default function RoutesPage() {
                   <select value={regionId} onChange={e => { setRegionId(e.target.value); setCityFilter(""); }}
                     className="w-full py-2.5 pl-3 pr-8 text-sm rounded-xl focus:outline-none appearance-none"
                     style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}>
-                    <optgroup label={t("Республикалық маңызды қалалар", "Города республиканского значения")}>
-                      {REPUBLICAN_CITIES.map(c => <option key={c.id} value={c.id}>{c.name[lang]}</option>)}
+                    <optgroup label={t("Республикалық маңызды қалалар", "Города республиканского значения", "Republican Significance Cities")}>
+                      {REPUBLICAN_CITIES.map(c => <option key={c.id} value={c.id}>{(c.name as any)[lang] || c.name.kk}</option>)}
                     </optgroup>
-                    <optgroup label={t("Облыстар", "Области")}>
-                      {KAZAKHSTAN_REGIONS.map(r => <option key={r.id} value={r.id}>{r.name[lang]}</option>)}
+                    <optgroup label={t("Облыстар", "Области", "Regions")}>
+                      {KAZAKHSTAN_REGIONS.map(r => <option key={r.id} value={r.id}>{(r.name as any)[lang] || r.name.kk}</option>)}
                     </optgroup>
                   </select>
                   <ChevronDown className="absolute right-2.5 top-3 w-4 h-4 pointer-events-none" style={{ color: "#8B6914" }} />
@@ -216,15 +216,15 @@ export default function RoutesPage() {
                 <div>
                   <label className="block text-xs font-semibold mb-1.5 flex items-center gap-1" style={{ color: "#5C4A35" }}>
                     <MapPin className="w-3.5 h-3.5" style={{ color: "#C9A227" }} />
-                    {t("Қала / Аудан", "Город / Район")}
+                    {t("Қала / Аудан", "Город / Район", "City / District")}
                   </label>
                   <div className="relative">
                     <select value={cityFilter} onChange={e => setCityFilter(e.target.value)}
                       className="w-full py-2.5 pl-3 pr-8 text-sm rounded-xl focus:outline-none appearance-none"
                       style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}>
-                      <option value="">{t("Барлық қалалар", "Все города")}</option>
+                      <option value="">{t("Барлық қалалар", "Все города", "All Cities")}</option>
                       {selectedRegionData.cities.map((c, i) => (
-                        <option key={i} value={c.name.kk}>{c.name[lang]}</option>
+                        <option key={i} value={c.name.kk}>{(c.name as any)[lang] || c.name.kk}</option>
                       ))}
                     </select>
                     <ChevronDown className="absolute right-2.5 top-3 w-4 h-4 pointer-events-none" style={{ color: "#8B6914" }} />

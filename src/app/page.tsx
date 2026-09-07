@@ -1,13 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { Map, Bot, Compass, Clock, BarChart2, Beaker, BookOpen, Info, ArrowRight, Landmark, MapPin, AudioLines, GraduationCap, Users, X, Send } from "lucide-react";
+import { Map, Bot, Compass, Clock, BarChart2, Beaker, BookOpen, Info, ArrowRight, Landmark, MapPin, AudioLines, Trophy, Sparkles, GraduationCap, PlusCircle, CheckCircle2, X, Send, Globe, ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
+import { SuggestedObjectSubmission } from "@/types";
 
 export default function Home() {
   const { lang, t } = useLanguage();
-  const [showSuggestModal, setShowSuggestModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [submittedSuccess, setSubmittedSuccess] = useState(false);
+  const [formData, setFormData] = useState<SuggestedObjectSubmission>({
+    name: "",
+    region: "",
+    category: "",
+    description: "",
+    legend: "",
+    authorName: "",
+    contact: "",
+  });
 
   const features = [
     {
@@ -17,7 +28,7 @@ export default function Home() {
       bg: "rgba(26,95,122,0.1)",
       border: "rgba(26,95,122,0.25)",
       title: { kk: "Интерактивті карта", ru: "Интерактивная карта", en: "Interactive Map" },
-      desc: { kk: "GIS картада нысандарды іздеңіз", ru: "Ищите объекты на GIS-карте", en: "Search objects on GIS map" },
+      desc: { kk: "20 өңір бойынша GIS іздеу", ru: "GIS-поиск по 20 регионам", en: "GIS search across 20 regions" },
     },
     {
       href: "/guide",
@@ -26,7 +37,7 @@ export default function Home() {
       bg: "rgba(139,58,139,0.1)",
       border: "rgba(139,58,139,0.25)",
       title: { kk: "AI Guide", ru: "AI Guide", en: "AI Guide" },
-      desc: { kk: "Тарихшы AI-мен сөйлесіңіз", ru: "Общайтесь с AI-историком", en: "Chat with AI Historian" },
+      desc: { kk: "Мультимодальді AI тарихшы", ru: "Мультимодальный AI-историк", en: "Multimodal AI historian" },
     },
     {
       href: "/routes",
@@ -34,8 +45,8 @@ export default function Home() {
       color: "#C9A227",
       bg: "rgba(201,162,39,0.1)",
       border: "rgba(201,162,39,0.25)",
-      title: { kk: "Маршруттар", ru: "Маршруты", en: "Routes" },
-      desc: { kk: "AI арқылы жеке маршрут", ru: "Персональный маршрут с AI", en: "Personalized AI routes" },
+      title: { kk: "Маршруттар", ru: "Маршруты", en: "Smart Routes" },
+      desc: { kk: "AI арқылы жеке саяхат", ru: "Персональный маршрут с AI", en: "Personalized AI routes" },
     },
     {
       href: "/timeline",
@@ -44,16 +55,16 @@ export default function Home() {
       bg: "rgba(45,106,79,0.1)",
       border: "rgba(45,106,79,0.25)",
       title: { kk: "Тарихи лента", ru: "Историческая лента", en: "Timeline" },
-      desc: { kk: "Дәуірлер бойынша зерттеу", ru: "Исследование по эпохам", en: "Explore by eras" },
+      desc: { kk: "13 тарихи дәуір шежіресі", ru: "Хроника 13 исторических эпох", en: "Chronicle of 13 eras" },
     },
     {
-      href: "/statistics",
-      icon: BarChart2,
-      color: "#C4714F",
-      bg: "rgba(196,113,79,0.1)",
-      border: "rgba(196,113,79,0.25)",
-      title: { kk: "Статистика", ru: "Статистика", en: "Statistics" },
-      desc: { kk: "Деректер базасының аналитикасы", ru: "Аналитика базы данных", en: "Database analytics" },
+      href: "/quests",
+      icon: Trophy,
+      color: "#8B3A8B",
+      bg: "rgba(139,58,139,0.1)",
+      border: "rgba(139,58,139,0.25)",
+      title: { kk: "Тарихи квесттер", ru: "Исторические квесты", en: "Heritage Quests" },
+      desc: { kk: "Интерактивті викториналар", ru: "Интерактивные викторины", en: "Interactive quizzes" },
     },
     {
       href: "/laboratory",
@@ -61,157 +72,267 @@ export default function Home() {
       color: "#1A5F7A",
       bg: "rgba(26,95,122,0.1)",
       border: "rgba(26,95,122,0.25)",
-      title: { kk: "AI Зертхана", ru: "AI Лаборатория", en: "AI Lab" },
-      desc: { kk: "Ұсыныс алгоритмдері", ru: "Алгоритмы рекомендаций", en: "Recommendation algorithms" },
+      title: { kk: "AI Зертхана", ru: "AI Лаборатория", en: "AI Laboratory" },
+      desc: { kk: "Семантикалық граф алгоритмі", ru: "Алгоритм семантического графа", en: "Semantic graph algorithm" },
+    },
+    {
+      href: "/research",
+      icon: GraduationCap,
+      color: "#C4714F",
+      bg: "rgba(196,113,79,0.1)",
+      border: "rgba(196,113,79,0.25)",
+      title: { kk: "Edu Mode (Білім)", ru: "Edu Mode (Образование)", en: "Edu Mode" },
+      desc: { kk: "Сабақтарға интеграция", ru: "Интеграция в уроки", en: "Lesson integration" },
+    },
+    {
+      href: "/statistics",
+      icon: BarChart2,
+      color: "#5C4A35",
+      bg: "rgba(92,74,53,0.1)",
+      border: "rgba(92,74,53,0.2)",
+      title: { kk: "Статистика", ru: "Статистика", en: "Analytics" },
+      desc: { kk: "Ұлттық мұра аналитикасы", ru: "Аналитика национального наследия", en: "National heritage analytics" },
     },
   ];
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.region) return;
+    setSubmittedSuccess(true);
+    setTimeout(() => {
+      setSubmittedSuccess(false);
+      setShowSubmitModal(false);
+      setFormData({ name: "", region: "", category: "", description: "", legend: "", authorName: "", contact: "" });
+    }, 2200);
+  };
+
   return (
-    <div className="min-h-screen overflow-x-hidden relative bg-[#FAF7F2] font-sans">
-      
-      {/* Dynamic Technological Background for Hero */}
-      <div className="absolute top-0 left-0 w-full h-[85vh] bg-[#FAF7F2] overflow-hidden -z-10">
-        {/* Neon Grid Vector - updated for light mode */}
-        <div className="absolute inset-0 opacity-[0.07]" style={{
-          backgroundImage: `linear-gradient(#1e3a8a 1px, transparent 1px), linear-gradient(90deg, #1e3a8a 1px, transparent 1px)`,
-          backgroundSize: '40px 40px',
-          transform: 'perspective(1000px) rotateX(60deg) scale(2) translateY(-10%)',
+    <div className="min-h-screen overflow-x-hidden relative" style={{ background: "#F5EFE6" }}>
+
+      {/* Dynamic Technological Background with Pulsing Sacred Geo-points */}
+      <div className="absolute top-0 left-0 w-full h-[85vh] overflow-hidden -z-10 pointer-events-none">
+        {/* Vector topographic grid */}
+        <div className="absolute inset-0 opacity-[0.06]" style={{
+          backgroundImage: `linear-gradient(#C4714F 1px, transparent 1px), linear-gradient(90deg, #C4714F 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
+          transform: 'perspective(1000px) rotateX(60deg) scale(2.2) translateY(-15%)',
           transformOrigin: 'top center'
         }}></div>
-        {/* Pulsing Geo-points */}
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="absolute rounded-full bg-blue-500 animate-ping opacity-60" style={{
-            width: '6px', height: '6px',
-            top: `${20 + Math.random() * 50}%`,
-            left: `${10 + Math.random() * 80}%`,
-            animationDuration: `${2 + Math.random() * 3}s`,
-            animationDelay: `${Math.random() * 2}s`
-          }}></div>
+
+        {/* Pulsing Sacred Geo-points of Kazakhstan */}
+        {[
+          { top: '35%', left: '48%', label: 'Түркістан' },
+          { top: '45%', left: '72%', label: 'Алматы' },
+          { top: '25%', left: '55%', label: 'Астана' },
+          { top: '48%', left: '22%', label: 'Маңғыстау' },
+          { top: '38%', left: '42%', label: 'Сырдария' },
+          { top: '28%', left: '78%', label: 'Алтай' },
+          { top: '20%', left: '38%', label: 'Ұлытау' },
+        ].map((pt, i) => (
+          <div key={i} className="absolute flex items-center gap-1.5" style={{ top: pt.top, left: pt.left }}>
+            <div className="relative flex items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-4 w-4 rounded-full opacity-75" style={{ background: "#C9A227" }}></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ background: "#C4714F" }}></span>
+            </div>
+            <span className="text-[10px] font-bold tracking-wider opacity-40 uppercase hidden sm:inline" style={{ color: "#8B6914" }}>
+              {pt.label}
+            </span>
+          </div>
         ))}
       </div>
 
-      <main className="max-w-6xl mx-auto px-5 pt-32 pb-16 relative z-10">
-        {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-in-down">
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-5 py-14 relative z-10">
+
+        {/* Rebranded National Level Hero */}
+        <div className="text-center mb-14 animate-fade-in-down">
+          {/* National Project Badge */}
+          <div className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full text-xs font-extrabold tracking-widest uppercase shadow-sm"
+            style={{ background: "rgba(201,162,39,0.15)", border: "1px solid rgba(201,162,39,0.35)", color: "#8B6914" }}>
+            <Globe className="w-3.5 h-3.5" style={{ color: "#C4714F" }} />
+            {t("РЕСПУБЛИКАЛЫҚ ЦИФРЛЫҚ МҰРА ЖОБАСЫ", "РЕСПУБЛИКАНСКИЙ ЦИФРОВОЙ ПРОЕКТ НАCЛЕДИЯ", "NATIONAL DIGITAL HERITAGE PROJECT")}
+          </div>
+
           {/* Main title */}
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight text-[#1e3a8a] drop-shadow-sm">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4 leading-tight" style={{ color: "#2C1F14" }}>
             GeoCulture{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              AI
+            <span className="relative inline-block">
+              <span style={{
+                background: "linear-gradient(135deg, #C9A227, #C4714F)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}>
+                AI
+              </span>
             </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-xl md:text-3xl font-bold max-w-4xl mx-auto mb-12 leading-relaxed text-[#0f172a]">
+          {/* National Subtitle */}
+          <p className="text-lg md:text-2xl font-light max-w-3xl mx-auto mb-10 leading-relaxed" style={{ color: "#5C4A35" }}>
             {t(
-              "Қазақстанның мәдени-тарихи мұрасын жасанды интеллект арқылы зерттеуге арналған бірыңғай ұлттық экожүйе",
-              "Единая национальная экосистема для исследования культурно-исторического наследия Казахстана с помощью ИИ",
-              "A unified national ecosystem for exploring the cultural and historical heritage of Kazakhstan through AI"
+              "Қазақстанның бай тарихи-мәдени мұрасы мен сакралды географиясын жасанды интеллект арқылы зерттеудің бірыңғай ұлттық цифрлық платформасы",
+              "Единая национальная цифровая платформа для исследования богатого историко-культурного наследия и сакральной географии Казахстана с помощью искусственного интеллекта",
+              "Unified national digital platform for exploring Kazakhstan's rich cultural heritage and sacred geography powered by AI"
             )}
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-16">
+          {/* CTA Buttons with Soundwave Equalizer Micro-animation */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-14">
+            {/* Primary CTA */}
             <Link
               href="/map"
-              className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-extrabold text-lg transition-all hover:scale-105 shadow-[0_10px_30px_rgba(6,182,212,0.4)] bg-cyan-500 text-slate-900 hover:bg-cyan-400"
+              className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-105 shadow-lg"
+              style={{ background: "#1A5F7A", color: "#fff", boxShadow: "0 8px 24px rgba(26,95,122,0.3)" }}
             >
-              <Map className="w-6 h-6" />
+              <Map className="w-5 h-5" />
               {t("Картаны ашу", "Открыть карту", "Open Map")}
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4" />
             </Link>
-            
-            {/* Secondary CTA with Soundwave effect */}
+
+            {/* Technological Secondary CTA with Soundwave Equalizer */}
             <Link
               href="/guide"
-              className="group w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 border border-cyan-400/50 bg-slate-900/50 backdrop-blur-md text-cyan-300 hover:shadow-[0_0_25px_rgba(34,211,238,0.3)] relative overflow-hidden"
+              className="group w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-105 border-2 relative overflow-hidden"
+              style={{
+                background: "rgba(196,113,79,0.08)",
+                borderColor: "#C4714F",
+                color: "#C4714F",
+                boxShadow: "0 4px 16px rgba(196,113,79,0.15)",
+              }}
             >
-              {/* Soundwave equalizer micro-animation on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
-              <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 absolute left-4 h-full transition-opacity">
-                 <span className="w-1 bg-cyan-400 h-1/3 animate-bounce" style={{animationDelay: '0ms'}}></span>
-                 <span className="w-1 bg-cyan-400 h-1/2 animate-bounce" style={{animationDelay: '100ms'}}></span>
-                 <span className="w-1 bg-cyan-400 h-2/3 animate-bounce" style={{animationDelay: '200ms'}}></span>
-                 <span className="w-1 bg-cyan-400 h-1/2 animate-bounce" style={{animationDelay: '300ms'}}></span>
-                 <span className="w-1 bg-cyan-400 h-1/3 animate-bounce" style={{animationDelay: '400ms'}}></span>
-              </div>
-              <Bot className="w-6 h-6 group-hover:ml-8 transition-all" />
+              <Bot className="w-5 h-5 transition-transform group-hover:scale-110" />
               <span>{t("AI гидті іске қосу", "Запустить AI Guide", "Launch AI Guide")}</span>
+              
+              {/* Soundwave Equalizer Micro-animation */}
+              <div className="flex items-end gap-0.5 h-3.5 ml-1">
+                {[0.4, 0.8, 0.5, 0.9, 0.3].map((delay, idx) => (
+                  <span
+                    key={idx}
+                    className="w-0.5 rounded-full group-hover:animate-pulse"
+                    style={{
+                      height: `${(idx % 3 + 1) * 33}%`,
+                      background: "#C4714F",
+                      animationDuration: `${0.6 + delay}s`,
+                      animationDelay: `${delay}s`,
+                    }}
+                  />
+                ))}
+              </div>
             </Link>
+
+            {/* Crowdsourcing Trigger Button */}
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-sm transition-all hover:scale-105"
+              style={{ background: "rgba(201,162,39,0.12)", border: "1px solid rgba(201,162,39,0.3)", color: "#8B6914" }}
+            >
+              <PlusCircle className="w-4 h-4" style={{ color: "#C9A227" }} />
+              {t("Нысан ұсыну", "Предложить объект", "Suggest Object")}
+            </button>
           </div>
         </div>
 
-        {/* Republican Level Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-20 relative z-20">
+        {/* National Scaled Metric Cards (500+ objects, 20 regions) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16">
           {[
-            { icon: Landmark, value: "500+", label: t("нысан мен аңыз", "объектов и легенд", "objects & legends"), color: "#0ea5e9" },
-            { icon: MapPin, value: "20", label: t("өңір", "регионов", "regions"), color: "#3b82f6" },
-            { icon: AudioLines, value: "AI", label: t("аудиогид", "аудиогид", "audio guide"), color: "#8b5cf6" },
-            { icon: Compass, value: "Smart", label: t("маршруттар", "маршруты", "routes"), color: "#06b6d4" },
+            { icon: Landmark, value: "500+", label: t("нысан мен аңыз", "объектов и легенд", "heritage & legends"), color: "#C9A227" },
+            { icon: MapPin, value: "20", label: t("өңір (17+3)", "регионов (17+3)", "regions (17+3)"), color: "#1A5F7A" },
+            { icon: AudioLines, value: "AI", label: t("аудио & сурет", "аудио & рисунок", "audio & visual AI"), color: "#C4714F" },
+            { icon: Compass, value: "Smart", label: t("маршруттар", "маршруты", "smart routes"), color: "#2D6A4F" },
           ].map((stat, i) => {
             const Icon = stat.icon;
             return (
-              <div key={i} className="rounded-2xl p-6 text-center flex flex-col items-center bg-white/90 backdrop-blur-md border border-white/20 shadow-xl hover:-translate-y-1 transition-transform">
-                <Icon className="w-8 h-8 mb-3" style={{ color: stat.color }} />
-                <div className="text-3xl font-black mb-1 text-slate-800">{stat.value}</div>
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{stat.label}</div>
+              <div key={i} className="rounded-2xl p-5 text-center flex flex-col items-center transition-all hover:shadow-md"
+                style={{ background: "rgba(255,248,240,0.85)", border: "1px solid rgba(196,113,79,0.15)" }}>
+                <Icon className="w-7 h-7 mb-2" style={{ color: stat.color }} />
+                <div className="text-2xl font-extrabold mb-1" style={{ color: "#2C1F14" }}>{stat.value}</div>
+                <div className="text-xs font-medium" style={{ color: "#8B6914" }}>{stat.label}</div>
               </div>
             );
           })}
         </div>
 
-        {/* Republican Level Modules: Edu Mode & Crowdsourcing */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
-          {/* Edu Mode Section */}
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-8 rounded-3xl border border-indigo-100 shadow-sm relative overflow-hidden group">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-100 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-            <GraduationCap className="w-10 h-10 text-indigo-600 mb-4 relative z-10" />
-            <h3 className="text-2xl font-bold text-slate-800 mb-2 relative z-10">{t("Мұғалім мен Оқушы режимі", "Режим Учителя и Ученика", "Edu Mode")}</h3>
-            <p className="text-slate-600 text-sm mb-6 relative z-10 leading-relaxed">
-              {t("«Қазақстан тарихы» және «География» сабақтарына арналған дайын виртуалды турлар, цифрлық кейстер мен квиздер.", "Готовые виртуальные туры, цифровые кейсы и квизы для уроков «История Казахстана» и «География».", "Ready-made virtual tours, digital cases, and quizzes for History and Geography lessons.")}
-            </p>
-            <Link href="/research" className="inline-flex items-center gap-2 text-indigo-600 font-bold text-sm hover:gap-3 transition-all relative z-10">
-              {t("Әдістемеге өту", "Перейти к методике", "Go to Edu Mode")} <ArrowRight className="w-4 h-4" />
-            </Link>
+        {/* Educational Contour Banner (Edu Mode) */}
+        <div className="max-w-5xl mx-auto mb-14 rounded-2xl p-6 border shadow-sm flex flex-col md:flex-row items-center justify-between gap-6"
+          style={{ background: "linear-gradient(135deg, rgba(26,95,122,0.08) 0%, rgba(201,162,39,0.08) 100%)", borderColor: "rgba(26,95,122,0.2)" }}>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "#1A5F7A", color: "#fff" }}>
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-1" style={{ background: "rgba(26,95,122,0.15)", color: "#1A5F7A" }}>
+                {t("Білім контуры / Edu Mode", "Образовательный контур / Edu Mode", "Educational Contour / Edu Mode")}
+              </div>
+              <h3 className="text-lg font-bold" style={{ color: "#2C1F14" }}>
+                {t("«Қазақстан тарихы» мен «География» сабақтарына арналған цифрлық кейстер", "Цифровые кейсы для уроков «История Казахстана» и «География»", "Digital cases for History of Kazakhstan & Geography lessons")}
+              </h3>
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: "#5C4A35" }}>
+                {t(
+                  "Мұғалімдер мен оқушыларға арналған виртуалды турлар, интерактивті карта тапсырмалары және тарихи викториналар.",
+                  "Виртуальные туры, задания на интерактивной карте и исторические викторины для учителей и учащихся.",
+                  "Virtual tours, interactive map tasks, and historical quizzes for teachers and students."
+                )}
+              </p>
+            </div>
           </div>
+          <Link href="/research"
+            className="flex-shrink-0 px-5 py-3 rounded-xl text-xs font-bold transition-all shadow-sm"
+            style={{ background: "#1A5F7A", color: "#fff" }}>
+            {t("Әдістемені ашу", "Открыть методику", "Open Edu Mode")}
+          </Link>
+        </div>
 
-          {/* Crowdsourcing Section */}
-          <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-8 rounded-3xl border border-orange-100 shadow-sm relative overflow-hidden group">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-orange-100 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-            <Users className="w-10 h-10 text-orange-500 mb-4 relative z-10" />
-            <h3 className="text-2xl font-bold text-slate-800 mb-2 relative z-10">{t("Халықтық мұра (Crowdsourcing)", "Народное наследие (Крудсорсинг)", "Crowdsourcing")}</h3>
-            <p className="text-slate-600 text-sm mb-6 relative z-10 leading-relaxed">
-              {t("Өз өңіріңіздің сакралды нысанын немесе аңызын ұсыныңыз. Бізбен бірге жалпыұлттық деректер базасын толықтырыңыз.", "Предложите сакральный объект или легенду своего региона. Пополняйте общенациональный банк данных вместе с нами.", "Propose a sacred object or legend from your region to enrich the national databank.")}
-            </p>
-            <button 
-              onClick={() => setShowSuggestModal(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-sm transition-all relative z-10 shadow-md"
-            >
-              {t("Нысан ұсыну", "Предложить объект", "Suggest an Object")}
-            </button>
+        {/* Crowdsourcing Banner ("Халықтық мұра" / Open Data) */}
+        <div className="max-w-5xl mx-auto mb-16 rounded-2xl p-6 border shadow-sm flex flex-col md:flex-row items-center justify-between gap-6"
+          style={{ background: "rgba(255,248,240,0.9)", borderColor: "rgba(196,113,79,0.2)" }}>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "#C4714F", color: "#fff" }}>
+              <PlusCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-1" style={{ background: "rgba(196,113,79,0.12)", color: "#C4714F" }}>
+                {t("Халықтық мұра / Открытые данные", "Народное наследие / Открытые данные", "Crowdsourced Heritage / Open Data")}
+              </div>
+              <h3 className="text-lg font-bold" style={{ color: "#2C1F14" }}>
+                {t("Өңіріңіздің киелі нысанын немесе аңызын ұсыныңыз", "Предложите сакральный объект или легенду своего региона", "Suggest a sacred object or legend of your region")}
+              </h3>
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: "#5C4A35" }}>
+                {t(
+                  "Платформаны жалпыұлттық ашық банкке айналдыру үшін модерациядан өтетін ұсыныс пішіні.",
+                  "Форма модерации для превращения платформы в пополняемый общенациональный банк данных.",
+                  "Moderated submission form to make the platform an open national database."
+                )}
+              </p>
+            </div>
           </div>
+          <button onClick={() => setShowSubmitModal(true)}
+            className="flex-shrink-0 px-5 py-3 rounded-xl text-xs font-bold transition-all border"
+            style={{ background: "rgba(196,113,79,0.1)", borderColor: "#C4714F", color: "#C4714F" }}>
+            {t("Нысан ұсыну", "Предложить объект", "Suggest Object")}
+          </button>
         </div>
 
         {/* Features Grid */}
-        <div className="max-w-5xl mx-auto mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#1e3a8a]">
-            {t("Платформа мүмкіндіктері", "Возможности платформы", "Platform Features")}
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8" style={{ color: "#2C1F14" }}>
+            {t("Ұлттық платформа мүмкіндіктері", "Возможности национальной платформы", "National Platform Features")}
           </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
                 <Link
                   key={feature.href}
                   href={feature.href}
-                  className="group flex flex-col gap-3 p-6 rounded-3xl bg-white border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl"
+                  className="group flex flex-col gap-3 p-5 rounded-2xl border transition-all hover:scale-[1.03] hover:shadow-lg"
+                  style={{ background: feature.bg, borderColor: feature.border }}
                 >
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-colors group-hover:scale-110" style={{ background: feature.bg }}>
-                    <Icon className="w-6 h-6" style={{ color: feature.color }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: feature.bg, border: `1px solid ${feature.border}` }}>
+                    <Icon className="w-5 h-5" style={{ color: feature.color }} />
                   </div>
                   <div>
-                    <p className="font-bold text-[#1e3a8a] text-lg mb-1">{t(feature.title.kk, feature.title.ru, feature.title.en)}</p>
-                    <p className="text-sm text-slate-500 leading-relaxed">{t(feature.desc.kk, feature.desc.ru, feature.desc.en)}</p>
+                    <p className="font-bold text-sm" style={{ color: "#2C1F14" }}>{feature.title[lang]}</p>
+                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "#8B6914" }}>{feature.desc[lang]}</p>
                   </div>
                 </Link>
               );
@@ -219,43 +340,151 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Footer info (Moving School Info here) */}
-        <div className="text-center text-sm text-slate-500 border-t border-slate-200 pt-8 mt-12 pb-4">
-          <p className="font-bold text-slate-700 mb-2">GeoCulture AI © 2026</p>
-          <p>{t("Команда жобасы: №290 Орта мектеп", "Проект команды: Средняя школа №290", "Project by: Secondary School №290")}</p>
-          <div className="mt-4 space-x-4">
-            <Link href="/about" className="hover:text-blue-600 transition-colors">{t("Жоба туралы", "О проекте", "About Project")}</Link>
-          </div>
-        </div>
+        {/* Footer with Exclusive School & Author Credits */}
+        <footer className="mt-16 pt-8 border-t text-center text-xs space-y-2" style={{ borderColor: "rgba(196,113,79,0.15)", color: "#A08060" }}>
+          <p className="font-semibold" style={{ color: "#5C4A35" }}>
+            GeoCulture AI · {t("Республикалық цифрлық мұра платформасы", "Республиканская платформа цифрового наследия", "National Digital Heritage Platform")}
+          </p>
+          <p className="text-[11px]">
+            {t(
+              "Білім контуры: №290 орта мектебі оқушыларының ғылыми-зерттеу жобасы негізінде",
+              "Образовательный контур: На основе научно-исследовательского проекта учащихся средней школы №290",
+              "Educational Contour: Based on research project of School №290 students"
+            )} · 2024–2026
+          </p>
+        </footer>
+
       </main>
 
-      {/* Crowdsourcing Modal */}
-      {showSuggestModal && (
-        <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl relative border border-orange-200 p-8">
-            <button 
-              onClick={() => setShowSuggestModal(false)}
-              className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors"
-            >
+      {/* Crowdsourcing Modal ("Нысан ұсыну") */}
+      {showSubmitModal && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4" style={{ background: "rgba(44,31,20,0.6)", backdropFilter: "blur(6px)" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 shadow-2xl animate-fade-in-down relative" style={{ background: "#FFF8F0", border: "1px solid rgba(196,113,79,0.3)" }}>
+            <button onClick={() => setShowSubmitModal(false)} className="absolute top-4 right-4 p-1.5 rounded-lg text-stone-500 hover:bg-orange-100">
               <X className="w-4 h-4" />
             </button>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">
-              {t("Нысан ұсыну", "Предложить объект", "Suggest an Object")}
-            </h2>
-            <p className="text-sm text-slate-500 mb-6">
-              {t("Өңіріңіздегі тарихи немесе табиғи ескерткішті біздің базаға қосу үшін ақпарат қалдырыңыз. Модерациядан кейін ол картада пайда болады.", "Оставьте информацию, чтобы добавить исторический или природный памятник вашего региона в нашу базу. После модерации он появится на карте.", "Leave information to add a historical or natural monument of your region to our database. After moderation, it will appear on the map.")}
+
+            <h3 className="text-lg font-bold mb-1 flex items-center gap-2" style={{ color: "#2C1F14" }}>
+              <PlusCircle className="w-5 h-5" style={{ color: "#C4714F" }} />
+              {t("Сакралды нысан немесе аңыз ұсыну", "Предложить сакральный объект или легенду", "Suggest Sacred Object or Legend")}
+            </h3>
+            <p className="text-xs mb-4" style={{ color: "#8B6914" }}>
+              {t("Ақпарат модерациядан өткен соң ұлттық банкке қосылады", "Информация будет добавлена в банк после модерации", "Information will be added after moderation")}
             </p>
-            <div className="space-y-4">
-              <input type="text" placeholder={t("Нысан атауы", "Название объекта", "Object Name")} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
-              <input type="text" placeholder={t("Өңір (Мысалы: Маңғыстау)", "Регион (Например: Мангистау)", "Region (e.g. Mangystau)")} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-orange-400" />
-              <textarea placeholder={t("Қысқаша сипаттама немесе аңыз", "Краткое описание или легенда", "Brief description or legend")} rows={4} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 resize-none"></textarea>
-              <button 
-                onClick={() => { alert(t("Рақмет! Ақпарат модерацияға жіберілді.", "Спасибо! Информация отправлена на модерацию.", "Thank you! Information sent for moderation.")); setShowSuggestModal(false); }}
-                className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2"
-              >
-                <Send className="w-4 h-4" /> {t("Жіберу", "Отправить", "Submit")}
-              </button>
-            </div>
+
+            {submittedSuccess ? (
+              <div className="py-8 text-center space-y-2">
+                <CheckCircle2 className="w-12 h-12 mx-auto animate-bounce" style={{ color: "#2D6A4F" }} />
+                <h4 className="text-base font-bold" style={{ color: "#2D6A4F" }}>
+                  {t("Ұсынысыңыз қабылданды!", "Ваше предложение принято!", "Submission Received!")}
+                </h4>
+                <p className="text-xs" style={{ color: "#8B6914" }}>
+                  {t("Рақмет! Өңіріңіздің мұрасын сақтауға қосқан үлесіңіз үшін.", "Спасибо за вклад в сохранение наследия вашего региона.", "Thank you for contributing to your region's heritage.")}
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleFormSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4A35" }}>
+                    {t("Нысанның атауы", "Название объекта", "Object Name")} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder={t("Мысалы: Ақмешіт үңгірі", "Например: Пещера Акмечеть", "e.g., Akmeshit Cave")}
+                    className="w-full px-3 py-2 text-xs rounded-xl focus:outline-none"
+                    style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4A35" }}>
+                      {t("Өңір / Қала", "Регион / Город", "Region / City")} *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.region}
+                      onChange={e => setFormData({ ...formData, region: e.target.value })}
+                      placeholder={t("Түркістан облысы", "Туркестанская область", "Turkestan region")}
+                      className="w-full px-3 py-2 text-xs rounded-xl focus:outline-none"
+                      style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4A35" }}>
+                      {t("Санат", "Категория", "Category")}
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={e => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full px-3 py-2 text-xs rounded-xl focus:outline-none"
+                      style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}
+                    >
+                      <option value="">{t("Таңдаңыз", "Выберите", "Select")}</option>
+                      <option value="sacred">{t("Киелі орын", "Сакральное место", "Sacred site")}</option>
+                      <option value="monument">{t("Сәулет ескерткіші", "Памятник архитектуры", "Monument")}</option>
+                      <option value="legend">{t("Аңыз бен жыр", "Легенда и предание", "Legend")}</option>
+                      <option value="nature">{t("Табиғат", "Природа", "Nature")}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4A35" }}>
+                    {t("Сипаттамасы мен тарихи дерегі", "Описание и исторические данные", "Description & Context")} *
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={formData.description}
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                    placeholder={t("Нысанның тарихы, орналасқан жері...", "История объекта, местоположение...", "History of the object, location...")}
+                    className="w-full px-3 py-2 text-xs rounded-xl focus:outline-none"
+                    style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4A35" }}>
+                      {t("Ұсынушы (Аты-жөні)", "Автор (ФИО)", "Author Name")}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.authorName}
+                      onChange={e => setFormData({ ...formData, authorName: e.target.value })}
+                      placeholder={t("Асан Әлиев", "Асан Алиев", "Asan Aliyev")}
+                      className="w-full px-3 py-2 text-xs rounded-xl focus:outline-none"
+                      style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4A35" }}>
+                      {t("Байланыс (Email/Тел)", "Контакты (Email/Тел)", "Contact")}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.contact}
+                      onChange={e => setFormData({ ...formData, contact: e.target.value })}
+                      placeholder="email@example.com"
+                      className="w-full px-3 py-2 text-xs rounded-xl focus:outline-none"
+                      style={{ background: "rgba(196,113,79,0.06)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}
+                    />
+                  </div>
+                </div>
+
+                <button type="submit"
+                  className="w-full py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all mt-2"
+                  style={{ background: "#1A5F7A", color: "#fff" }}>
+                  <Send className="w-3.5 h-3.5" />
+                  {t("Модерацияға жіберу", "Отправить на модерацию", "Submit for Moderation")}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}

@@ -67,7 +67,7 @@ function GuideContent() {
 
   useEffect(() => {
     setMessages(prev => [
-      { id: "1", sender: "ai", text: getWelcomeText(lang), timestamp: Date.now() },
+      { id: "1", sender: "ai", text: getWelcomeText(lang === 'kk' ? 'kk' : 'ru'), timestamp: Date.now() },
       ...prev.slice(1)
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,20 +101,21 @@ function GuideContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          history: messages.slice(-10),
+          history: messages.map(m => ({ role: m.sender === "user" ? "user" : "assistant", content: m.text })),
+          mode,
           lang,
-          objectContext: selectedObject ? selectedObject.name[lang] : undefined,
+          objectContext: selectedObject ? (selectedObject.name[lang === 'kk' ? 'kk' : 'ru'] || selectedObject.name.kk) : undefined,
           clientApiKey: apiKey,
         }),
       });
 
       const data = await res.json();
-      const aiText = data.reply || generateLocalResponse(text, lang);
+      const aiText = data.reply || generateLocalResponse(text, lang === 'kk' ? 'kk' : 'ru');
       const aiMsg: ChatMessage = { id: (Date.now() + 1).toString(), sender: "ai", text: aiText, timestamp: Date.now() };
       setMessages(prev => [...prev, aiMsg]);
     } catch {
       // Fallback
-      const fallback = generateLocalResponse(text, lang);
+      const fallback = generateLocalResponse(text, lang === 'kk' ? 'kk' : 'ru');
       setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), sender: "ai", text: fallback, timestamp: Date.now() }]);
     } finally {
       setIsTyping(false);
@@ -156,7 +157,7 @@ function GuideContent() {
           <p className="text-xs mt-0.5" style={{ color: "#8B6914" }}>
             {t("Тарихи нысандар бойынша жеке гидіңіз", "Ваш персональный гид по историческим объектам")}
             {selectedObject && <span className="ml-2 px-1.5 py-0.5 rounded text-[10px]" style={{ background: "rgba(196,113,79,0.1)", color: "#C4714F" }}>
-              📍 {selectedObject.name[lang]}
+              📍 {selectedObject.name[lang === 'kk' ? 'kk' : 'ru'] || selectedObject.name.kk}
             </span>}
           </p>
         </div>
@@ -165,7 +166,7 @@ function GuideContent() {
             <button key={key} onClick={() => setMode(key)}
               className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{ background: mode === key ? "#1A5F7A" : "transparent", color: mode === key ? "#fff" : "#8B6914" }}>
-              {label[lang]}
+              {label[lang === 'kk' ? 'kk' : 'ru'] || label.kk}
             </button>
           ))}
           <div className="w-px h-4 bg-[#8B6914] opacity-20 mx-1"></div>
@@ -248,7 +249,7 @@ function GuideContent() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: "#1A5F7A" }}>
                     <Sparkles className="w-3 h-3" />
-                    AI · {MODES[mode][lang]}
+                    AI · {MODES[mode][lang === 'kk' ? 'kk' : 'ru'] || MODES[mode].kk}
                   </div>
                   <button onClick={() => handleSpeak(msg.text, msg.id)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity ml-3"

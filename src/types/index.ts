@@ -95,3 +95,13 @@ export interface SearchSuggestion {
   zoom: number;
   objectId?: string;
 }
+
+export interface SuggestedObjectSubmission {
+  name: string;
+  region: string;
+  category: string;
+  description: string;
+  legend?: string;
+  authorName: string;
+  contact: string;
+}

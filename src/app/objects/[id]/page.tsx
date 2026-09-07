@@ -36,7 +36,7 @@ export default function ObjectPage() {
       return;
     }
 
-    const textToSpeak = object.audioText ? object.audioText[lang] : `${object.name[lang]}. ${object.description[lang]} ${object.historicalSignificance[lang]}`;
+    const textToSpeak = object.audioText ? object.audioText[lang] : `${(object.name[lang] || object.name.kk || "")}. ${object.description[lang]} ${object.historicalSignificance[lang]}`;
 
     try {
       const res = await fetch("/api/audio-guide", {
@@ -82,7 +82,7 @@ export default function ObjectPage() {
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="w-full md:w-80 h-56 rounded-xl overflow-hidden flex-shrink-0 relative" style={{ background: "#F5EFE6" }}>
               {object.image && !imgError ? (
-                <img src={object.image} alt={object.name[lang]} onError={() => setImgError(true)} className="w-full h-full object-cover" />
+                <img src={object.image} alt={(object.name[lang] || object.name.kk || "")} onError={() => setImgError(true)} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                   <ImageIcon className="w-10 h-10 opacity-40" style={{ color: "#C4714F" }} />
@@ -104,7 +104,7 @@ export default function ObjectPage() {
                 <span className="text-xs font-medium" style={{ color: "#8B6914" }}>{object.period}</span>
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-extrabold" style={{ color: "#2C1F14" }}>{object.name[lang]}</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold" style={{ color: "#2C1F14" }}>{(object.name[lang] || object.name.kk || "")}</h1>
 
               <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "#1A5F7A" }}>
                 <MapPin className="w-4 h-4" />
@@ -119,7 +119,7 @@ export default function ObjectPage() {
                   {isPlaying ? t("Тоқтату", "Стоп") : t("▶ Аудиогид", "▶ Аудиогид")}
                 </button>
 
-                <button onClick={() => router.push(`/guide?q=${encodeURIComponent(object.name[lang])}`)}
+                <button onClick={() => router.push(`/guide?q=${encodeURIComponent((object.name[lang] || object.name.kk || ""))}`)}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all"
                   style={{ background: "rgba(139,58,139,0.08)", borderColor: "rgba(139,58,139,0.2)", color: "#8B3A8B" }}>
                   <MessageSquare className="w-3.5 h-3.5" />
@@ -184,3 +184,4 @@ export default function ObjectPage() {
     </div>
   );
 }
+

@@ -1,15 +1,13 @@
 @echo off
-title GeoCulture AI
+chcp 65001 > nul
+title GeoCulture AI - Школа №290
 echo ===================================================
-echo     GeoCulture AI Платформасын іске қосу...
+echo     GeoCulture AI Платформасы іске қосылуда...
 echo     Запуск платформы GeoCulture AI...
 echo ===================================================
 echo.
-echo Сервер дайындалуда, куте турыныз (Подождите, сервер запускается)...
+echo Сайт ашылуда: http://localhost:3000
 echo.
 
-:: Open the browser immediately (it will connect once the server is ready)
 start http://localhost:3000
-
-:: Start the Next.js development server
 npm run dev

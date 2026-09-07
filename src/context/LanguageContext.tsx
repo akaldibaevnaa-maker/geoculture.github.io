@@ -1,8 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-
-export type Language = "kk" | "ru";
+import { Language } from "@/types";
 
 interface LanguageContextType {
   lang: Language;
@@ -17,7 +16,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedLang = localStorage.getItem("geoculture-lang") as Language;
-    if (savedLang && (savedLang === "kk" || savedLang === "ru")) {
+    if (savedLang && (savedLang === "kk" || savedLang === "ru" || savedLang === "en")) {
       setLang(savedLang);
     }
   }, []);
@@ -29,6 +28,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const t = (kkText: string, ruText: string, enText?: string) => {
     if (lang === "kk") return kkText;
+    if (lang === "en") return enText || ruText;
     return ruText;
   };
 

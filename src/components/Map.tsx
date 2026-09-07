@@ -110,7 +110,7 @@ export default function MapComponent() {
 
   const allSuggestions = useRef<SearchSuggestion[]>([]);
   useEffect(() => {
-    allSuggestions.current = buildSuggestions(lang);
+    allSuggestions.current = buildSuggestions(lang === 'kk' ? 'kk' : 'ru');
   }, [lang]);
 
   const center: [number, number] = [48.0196, 66.9237];
@@ -410,9 +410,9 @@ export default function MapComponent() {
                   className="w-full py-2 px-3 text-sm rounded-xl focus:outline-none"
                   style={{ background: "rgba(196,113,79,0.07)", border: "1px solid rgba(196,113,79,0.2)", color: "#2C1F14" }}
                 >
-                  <option value="">{t("Барлық түрлер", "Все типы")}</option>
+                  <option value="">{t("Барлық түрлер", "Все типы", "All Types")}</option>
                   {types.map(type => (
-                    <option key={type} value={type}>{TYPE_LABELS[type]?.[lang] || type}</option>
+                    <option key={type} value={type}>{(TYPE_LABELS[type] as any)?.[lang] || TYPE_LABELS[type]?.kk || type}</option>
                   ))}
                 </select>
               </div>

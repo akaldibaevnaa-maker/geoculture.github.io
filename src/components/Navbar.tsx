@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { Bot, Menu, X, Map, Compass, Clock, BarChart2, BookOpen, Info, Beaker, Trophy, ChevronDown, GraduationCap } from "lucide-react";
+import { Bot, Menu, X, Map, Compass, Clock, BarChart2, Info, Beaker, Trophy, ChevronDown, GraduationCap, Globe } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { Language } from "@/types";
 
 export default function Navbar() {
   const { lang, setLang, t } = useLanguage();
@@ -13,7 +14,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -29,9 +29,9 @@ export default function Navbar() {
       id: "explore",
       title: { kk: "Зерттеу", ru: "Исследование", en: "Explore" },
       links: [
-        { href: "/map", kk: "Карта", ru: "Карта", en: "Map", icon: Map },
-        { href: "/timeline", kk: "Тарихи лента", ru: "Историческая лента", en: "Timeline", icon: Clock },
-        { href: "/statistics", kk: "Статистика", ru: "Статистика", en: "Statistics", icon: BarChart2 },
+        { href: "/map", kk: "Интерактивті карта", ru: "Интерактивная карта", en: "Interactive Map", icon: Map },
+        { href: "/timeline", kk: "Тарихи лента", ru: "Историческая лента", en: "Historical Timeline", icon: Clock },
+        { href: "/statistics", kk: "Статистика", ru: "Статистика", en: "Analytics & Stats", icon: BarChart2 },
       ]
     },
     {
@@ -39,23 +39,23 @@ export default function Navbar() {
       title: { kk: "Интерактив", ru: "Интерактив", en: "Interactive" },
       links: [
         { href: "/guide", kk: "AI Guide", ru: "AI Guide", en: "AI Guide", icon: Bot },
-        { href: "/routes", kk: "Маршруттар", ru: "Маршруты", en: "Routes", icon: Compass },
-        { href: "/quests", kk: "Квесттер", ru: "Квесты", en: "Quests", icon: Trophy },
+        { href: "/routes", kk: "Маршруттар", ru: "Маршруты", en: "Smart Routes", icon: Compass },
+        { href: "/quests", kk: "Тарихи квесттер", ru: "Исторические квесты", en: "Heritage Quests", icon: Trophy },
       ]
     },
     {
       id: "edu",
-      title: { kk: "Ғылым мен Білім", ru: "Наука и Образование", en: "Science & Edu" },
+      title: { kk: "Ғылым мен Білім", ru: "Наука и Образование", en: "Edu & Science" },
       links: [
-        { href: "/laboratory", kk: "AI Зертхана", ru: "AI Лаборатория", en: "AI Lab", icon: Beaker },
-        { href: "/research", kk: "Әдістеме (Edu Mode)", ru: "Методика (Edu Mode)", en: "Edu Mode", icon: GraduationCap },
+        { href: "/laboratory", kk: "AI Зертхана", ru: "AI Лаборатория", en: "AI Laboratory", icon: Beaker },
+        { href: "/research", kk: "Әдістеме (Edu Mode)", ru: "Методика (Edu Mode)", en: "Edu Mode Rationale", icon: GraduationCap },
       ]
     },
     {
       id: "about",
       title: { kk: "Жоба туралы", ru: "О проекте", en: "About" },
       links: [
-        { href: "/about", kk: "Команда және Мәлімет", ru: "Команда и Информация", en: "Team & Info", icon: Info },
+        { href: "/about", kk: "Жоба мен Команда", ru: "Проект и Команда", en: "Project & Team", icon: Info },
       ]
     }
   ];
@@ -64,32 +64,33 @@ export default function Navbar() {
 
   return (
     <nav className="fixed w-full z-50 border-b transition-all duration-300" style={{
-      background: "rgba(245, 239, 230, 0.85)",
-      borderColor: "rgba(196, 113, 79, 0.15)",
+      background: "rgba(245, 239, 230, 0.95)",
+      borderColor: "rgba(196, 113, 79, 0.2)",
       backdropFilter: "blur(20px)",
     }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo */}
+          {/* Logo - National Level Rebranding */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex flex-col leading-tight group">
-              <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.2em] uppercase transition-colors" style={{ color: "#1A5F7A" }}>
-                {t("AI-POWERED CULTURAL ECOSYSTEM", "AI-POWERED CULTURAL ECOSYSTEM", "AI-POWERED CULTURAL ECOSYSTEM")}
+              <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.18em] uppercase transition-colors" style={{ color: "#C4714F" }}>
+                {t("РЕСПУБЛИКАЛЫҚ ЦИФРЛЫҚ МҰРА ЖОБАСЫ", "РЕСПУБЛИКАНСКИЙ ЦИФРОВОЙ ПРОЕКТ", "NATIONAL DIGITAL HERITAGE PROJECT")}
               </span>
               <span className="text-lg sm:text-xl font-extrabold" style={{ color: "#2C1F14" }}>
-                GeoCulture <span className="transition-colors group-hover:text-blue-600" style={{ color: "#C9A227" }}>AI</span>
+                GeoCulture <span style={{ color: "#C9A227" }}>AI</span>
               </span>
             </Link>
           </div>
 
-          {/* Desktop Menu */}
+          {/* Desktop Menu - Grouped Dropdowns */}
           <div className="hidden lg:flex flex-1 justify-center" ref={dropdownRef}>
             <div className="flex items-center space-x-1">
-              <Link href="/" className="px-3 py-2 rounded-xl text-sm font-semibold transition-all hover:bg-orange-50" style={{ color: isActive('/') ? "#C4714F" : "#5C4A35" }}>
+              <Link href="/" className="px-3 py-2 rounded-xl text-sm font-semibold transition-all hover:bg-orange-50"
+                style={{ color: isActive('/') ? "#C4714F" : "#5C4A35", fontWeight: isActive('/') ? 700 : 500 }}>
                 {t("Басты бет", "Главная", "Home")}
               </Link>
-              
+
               {navGroups.map((group) => (
                 <div key={group.id} className="relative">
                   <button
@@ -98,13 +99,12 @@ export default function Navbar() {
                     style={{ color: "#5C4A35" }}
                   >
                     {t(group.title.kk, group.title.ru, group.title.en)}
-                    <ChevronDown className={`w-3 h-3 transition-transform ${activeDropdown === group.id ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${activeDropdown === group.id ? 'rotate-180' : ''}`} />
                   </button>
-                  
-                  {/* Dropdown Menu */}
+
                   {activeDropdown === group.id && (
                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 rounded-2xl shadow-xl border overflow-hidden animate-fade-in-down"
-                      style={{ background: "#FFF8F0", borderColor: "rgba(196,113,79,0.15)" }}>
+                      style={{ background: "#FFF8F0", borderColor: "rgba(196,113,79,0.2)" }}>
                       <div className="p-2 flex flex-col gap-1">
                         {group.links.map(link => {
                           const Icon = link.icon;
@@ -113,15 +113,14 @@ export default function Navbar() {
                               key={link.href}
                               href={link.href}
                               onClick={() => setActiveDropdown(null)}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors hover:bg-white"
-                              style={{ 
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors hover:bg-orange-50"
+                              style={{
                                 color: isActive(link.href) ? "#C4714F" : "#2C1F14",
-                                background: isActive(link.href) ? "rgba(196,113,79,0.05)" : "transparent",
-                                fontWeight: isActive(link.href) ? "bold" : "medium"
+                                fontWeight: isActive(link.href) ? 700 : 500,
                               }}
                             >
-                              {Icon && <Icon className="w-4 h-4 opacity-70" style={{ color: isActive(link.href) ? "#C4714F" : "#1A5F7A" }} />}
-                              {t(link.kk, link.ru, link.en)}
+                              <Icon className="w-4 h-4" style={{ color: isActive(link.href) ? "#C4714F" : "#1A5F7A" }} />
+                              <span>{t(link.kk, link.ru, link.en)}</span>
                             </Link>
                           );
                         })}
@@ -133,17 +132,17 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Right Actions: Multilingual (KZ | RU | EN) + AI Guide CTA */}
           <div className="hidden lg:flex items-center space-x-3">
-            {/* Language switcher */}
-            <div className="flex items-center space-x-0.5 rounded-full p-1" style={{ background: "rgba(196, 113, 79, 0.05)", border: "1px solid rgba(196, 113, 79, 0.15)" }}>
-              {(['kk', 'ru'] as const).map(l => (
+            {/* Language switcher KZ | RU | EN */}
+            <div className="flex items-center space-x-0.5 rounded-full p-1" style={{ background: "rgba(196, 113, 79, 0.08)", border: "1px solid rgba(196, 113, 79, 0.2)" }}>
+              {(['kk', 'ru', 'en'] as Language[]).map(l => (
                 <button
                   key={l}
                   onClick={() => setLang(l)}
-                  className="px-2.5 py-1 rounded-full text-[11px] font-bold transition-all uppercase"
+                  className="px-2.5 py-1 rounded-full text-xs font-bold transition-all uppercase"
                   style={{
-                    background: lang === l ? "#1A5F7A" : "transparent",
+                    background: lang === l ? "#C4714F" : "transparent",
                     color: lang === l ? "#fff" : "#5C4A35",
                   }}
                 >
@@ -154,19 +153,20 @@ export default function Navbar() {
 
             <Link
               href="/guide"
-              className="group flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold transition-all shadow-[0_0_15px_rgba(26,95,122,0.2)] hover:shadow-[0_0_20px_rgba(26,95,122,0.4)]"
+              className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold transition-all shadow-sm"
               style={{ background: "#1A5F7A", color: "#fff" }}
             >
-              <Bot className="w-4 h-4 group-hover:animate-pulse" />
-              <span>{t("AI Guide", "AI Guide")}</span>
+              <Bot className="w-4 h-4" />
+              <span>{t("AI көмекші", "AI-помощник", "AI Assistant")}</span>
             </Link>
           </div>
 
           {/* Mobile menu button */}
           <div className="lg:hidden flex items-center gap-2">
-            <div className="flex items-center rounded-full p-0.5" style={{ background: "rgba(196,113,79,0.05)", border: "1px solid rgba(196,113,79,0.15)" }}>
-              {(['kk', 'ru'] as const).map(l => (
-                <button key={l} onClick={() => setLang(l)} className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase" style={{ background: lang === l ? "#1A5F7A" : "transparent", color: lang === l ? "#fff" : "#5C4A35" }}>
+            <div className="flex items-center rounded-full p-0.5" style={{ background: "rgba(196,113,79,0.1)", border: "1px solid rgba(196,113,79,0.2)" }}>
+              {(['kk', 'ru', 'en'] as Language[]).map(l => (
+                <button key={l} onClick={() => setLang(l)} className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
+                  style={{ background: lang === l ? "#C4714F" : "transparent", color: lang === l ? "#fff" : "#5C4A35" }}>
                   {l}
                 </button>
               ))}
@@ -184,52 +184,42 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="lg:hidden border-t max-h-[80vh] overflow-y-auto" style={{ background: "rgba(245,239,230,0.98)", borderColor: "rgba(196,113,79,0.15)" }}>
-          <div className="px-4 py-4 space-y-4">
-            <Link href="/" onClick={() => setIsOpen(false)} className="block px-3 py-2 text-sm font-bold" style={{ color: isActive('/') ? "#C4714F" : "#1e3a8a" }}>
+        <div className="lg:hidden border-t" style={{ background: "rgba(245,239,230,0.98)", borderColor: "rgba(196,113,79,0.15)" }}>
+          <div className="px-3 pt-2 pb-4 space-y-2">
+            <Link
+              href="/"
+              onClick={() => setIsOpen(false)}
+              className="block px-3 py-2 rounded-xl text-sm font-semibold"
+              style={{ color: isActive('/') ? "#C4714F" : "#2C1F14" }}
+            >
               {t("Басты бет", "Главная", "Home")}
             </Link>
-            
-            {navGroups.map(group => (
-              <div key={group.id} className="space-y-2">
-                <h3 className="text-[10px] font-bold uppercase tracking-wider pl-3 opacity-60" style={{ color: "#1e3a8a" }}>
+
+            {navGroups.map((group) => (
+              <div key={group.id} className="space-y-1">
+                <div className="px-3 py-1 text-xs font-bold uppercase tracking-wider" style={{ color: "#C4714F" }}>
                   {t(group.title.kk, group.title.ru, group.title.en)}
-                </h3>
-                <div className="grid grid-cols-1 gap-1">
-                  {group.links.map(link => {
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
-                        style={{
-                          color: isActive(link.href) ? "#C4714F" : "#2C1F14",
-                          background: isActive(link.href) ? "rgba(196,113,79,0.08)" : "transparent",
-                          fontWeight: isActive(link.href) ? "bold" : "medium",
-                        }}
-                      >
-                        {Icon && <Icon className="w-4 h-4 opacity-70" />}
-                        {t(link.kk, link.ru, link.en)}
-                      </Link>
-                    )
-                  })}
                 </div>
+                {group.links.map(link => {
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-medium"
+                      style={{
+                        color: isActive(link.href) ? "#C4714F" : "#5C4A35",
+                        background: isActive(link.href) ? "rgba(196,113,79,0.1)" : "transparent",
+                      }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color: "#1A5F7A" }} />
+                      <span>{t(link.kk, link.ru, link.en)}</span>
+                    </Link>
+                  );
+                })}
               </div>
             ))}
-            
-            <div className="pt-4 border-t" style={{ borderColor: "rgba(196,113,79,0.1)" }}>
-              <Link
-                href="/guide"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold shadow-md"
-                style={{ background: "#1A5F7A", color: "#fff" }}
-              >
-                <Bot className="w-4 h-4" />
-                {t("AI Guide", "AI Guide", "AI Guide")}
-              </Link>
-            </div>
           </div>
         </div>
       )}

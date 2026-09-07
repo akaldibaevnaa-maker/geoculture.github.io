@@ -109,10 +109,10 @@ export default function ObjectCard({ object, onClose }: ObjectCardProps) {
         setAudioState("playing");
       } else {
         // Fallback to browser TTS
-        useBrowserTTS(text || getAudioText());
+        useBrowserTTS(text || getAudioText() || "");
       }
     } catch {
-      useBrowserTTS(getAudioText());
+      useBrowserTTS(getAudioText() || "");
     }
   };
 
