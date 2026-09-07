@@ -79,6 +79,7 @@ export default function RoutesPage() {
   const [duration, setDuration] = useState(DURATIONS[2].kk);
   const [interest, setInterest] = useState(INTERESTS[0].kk);
   const [transport, setTransport] = useState(TRANSPORT[0].kk);
+  const [aiPrompt, setAiPrompt] = useState("");
 
   const selectedRegionData = ALL_REGIONS.find(r => r.id === regionId) || ALL_REGIONS[0];
 
@@ -136,8 +137,8 @@ export default function RoutesPage() {
       });
 
       const reason = lang === "kk"
-        ? `${selectedRegion.name.kk} аймағы бойынша ${chosen.length} нысанды қамтитын маршрут жасалды. Таңдалған қызығушылық: ${interest}. Болжалды жалпы қашықтық: ${totalDist} км.`
-        : `Построен маршрут по ${selectedRegion.name.ru}: ${chosen.length} объектов. Интересы: ${INTERESTS.find(i => i.kk === interest)?.ru || interest}. Общее расстояние: ~${totalDist} км.`;
+        ? `${aiPrompt ? `Сіздің сұранысыңыз ("${aiPrompt}") бойынша ` : ''}${selectedRegion.name.kk} аймағы бойынша ${chosen.length} нысанды қамтитын маршрут жасалды. Таңдалған қызығушылық: ${interest}. Болжалды жалпы қашықтық: ${totalDist} км.`
+        : `${aiPrompt ? `По вашему запросу ("${aiPrompt}") ` : ''}Построен маршрут по ${selectedRegion.name.ru}: ${chosen.length} объектов. Интересы: ${INTERESTS.find(i => i.kk === interest)?.ru || interest}. Общее расстояние: ~${totalDist} км.`;
 
       setRoute({
         points,
@@ -167,6 +168,28 @@ export default function RoutesPage() {
             </p>
 
             <form onSubmit={handleGenerate} className="space-y-4">
+              {/* AI Prompt */}
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 flex items-center gap-1 text-[#1A5F7A]">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {t("Еркін AI-сұраныс (міндетті емес)", "Свободный AI-запрос (необязательно)")}
+                </label>
+                <textarea 
+                  value={aiPrompt}
+                  onChange={e => setAiPrompt(e.target.value)}
+                  placeholder={t("Мысалы: 'Отбасылық 2 күндік демалыс, тарихи орындар мен табиғат...'", "Например: 'Семейная поездка на 2 дня, интересны древние крепости и природа...'")}
+                  className="w-full py-2.5 px-3 text-sm rounded-xl focus:outline-none resize-none h-20"
+                  style={{ background: "rgba(26,95,122,0.06)", border: "1px dashed rgba(26,95,122,0.3)", color: "#2C1F14" }}
+                />
+              </div>
+
+              {/* Separator */}
+              <div className="flex items-center gap-2 my-2">
+                <div className="h-px bg-[#8B6914] opacity-20 flex-1"></div>
+                <span className="text-[10px] font-medium text-[#8B6914] uppercase tracking-wider">{t("Немесе баптаулар", "Или настройки")}</span>
+                <div className="h-px bg-[#8B6914] opacity-20 flex-1"></div>
+              </div>
+
               {/* Region */}
               <div>
                 <label className="block text-xs font-semibold mb-1.5 flex items-center gap-1" style={{ color: "#5C4A35" }}>
@@ -266,12 +289,12 @@ export default function RoutesPage() {
               </div>
 
               <button type="submit" disabled={isGenerating}
-                className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-sm flex justify-center items-center gap-2 transition-all"
-                style={{ background: "#1A5F7A", color: "#fff", opacity: isGenerating ? 0.7 : 1 }}>
+                className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-sm flex justify-center items-center gap-2 transition-all hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #1A5F7A 0%, #2980b9 100%)", color: "#fff", opacity: isGenerating ? 0.7 : 1 }}>
                 {isGenerating ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <><Sparkles className="w-4 h-4" />{t("AI-мен маршрут құру", "Создать маршрут с AI")}</>
+                  <><Sparkles className="w-4 h-4" />{t("AI-Генерациялау", "AI-Генерация")}</>
                 )}
               </button>
             </form>

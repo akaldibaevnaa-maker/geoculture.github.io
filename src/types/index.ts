@@ -1,6 +1,9 @@
+export type Language = 'kk' | 'ru' | 'en';
+
 export interface LocalizedText {
   kk: string;
   ru: string;
+  en?: string;
 }
 
 export type ObjectType =

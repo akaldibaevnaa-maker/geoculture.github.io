@@ -55,6 +55,9 @@ export default function ObjectCard({ object, onClose }: ObjectCardProps) {
   // Image error fallback
   const [imgError, setImgError] = useState(false);
 
+  // AI Avatar state
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+
   const getAudioText = () => {
     if (object.audioText) return object.audioText[lang];
     return `${object.name[lang]}. ${object.description[lang]} ${object.historicalSignificance[lang]}`;
@@ -106,7 +109,7 @@ export default function ObjectCard({ object, onClose }: ObjectCardProps) {
         setAudioState("playing");
       } else {
         // Fallback to browser TTS
-        useBrowserTTS(text);
+        useBrowserTTS(text || getAudioText());
       }
     } catch {
       useBrowserTTS(getAudioText());
@@ -182,7 +185,8 @@ export default function ObjectCard({ object, onClose }: ObjectCardProps) {
 
   const handleGoToGuide = () => {
     handleStopAudio();
-    const query = encodeURIComponent(object.name[lang]);
+    const nameText = object.name ? (object.name[lang] || object.name.kk || "") : "";
+    const query = encodeURIComponent(nameText);
     router.push(`/guide?q=${query}`);
   };
 
@@ -382,7 +386,6 @@ export default function ObjectCard({ object, onClose }: ObjectCardProps) {
           )}
         </div>
 
-        {/* 3 action buttons */}
         <div className="grid grid-cols-3 gap-2">
           <button onClick={handleAIHistory} disabled={historyLoading}
             className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all text-center"
@@ -398,12 +401,21 @@ export default function ObjectCard({ object, onClose }: ObjectCardProps) {
             <span className="text-[9px] leading-tight">{t("AI сұрақ", "AI вопрос")}</span>
           </button>
 
-          <button onClick={() => setShowIllPanel(!showIllPanel)}
-            className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all"
-            style={{ background: showIllPanel ? "rgba(201,162,39,0.2)" : "rgba(201,162,39,0.08)", border: "1px solid rgba(201,162,39,0.25)", color: "#8B6914" }}>
-            <Sparkles className="w-4 h-4" />
-            <span className="text-[9px] leading-tight">{t("AI сурет", "AI рисунок")}</span>
-          </button>
+          {object.objectType === 'person' ? (
+            <button onClick={() => setShowAvatarModal(true)}
+              className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all hover:bg-yellow-100"
+              style={{ background: "rgba(201,162,39,0.2)", border: "1px solid rgba(201,162,39,0.4)", color: "#8B6914" }}>
+              <Users className="w-4 h-4" />
+              <span className="text-[9px] leading-tight font-bold">{t("AI Аватар", "AI Аватар")}</span>
+            </button>
+          ) : (
+            <button onClick={() => setShowIllPanel(!showIllPanel)}
+              className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all"
+              style={{ background: showIllPanel ? "rgba(201,162,39,0.2)" : "rgba(201,162,39,0.08)", border: "1px solid rgba(201,162,39,0.25)", color: "#8B6914" }}>
+              <Sparkles className="w-4 h-4" />
+              <span className="text-[9px] leading-tight">{t("AI сурет", "AI рисунок")}</span>
+            </button>
+          )}
         </div>
 
         {/* Route button */}
@@ -414,6 +426,69 @@ export default function ObjectCard({ object, onClose }: ObjectCardProps) {
           {t("Маршрут құру", "Построить маршрут")}
         </button>
       </div>
+
+      {/* AI Avatar Modal */}
+      {showAvatarModal && (
+        <div className="fixed inset-0 bg-black/60 z-[2000] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl relative border border-yellow-200">
+            {/* Close */}
+            <button 
+              onClick={() => setShowAvatarModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-white/30 backdrop-blur-md rounded-full text-gray-800 hover:bg-white/50 z-10 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            {/* 3D Simulation view */}
+            <div className="h-64 bg-gradient-to-b from-blue-900 via-indigo-900 to-black relative flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+              {/* Fake 3D Avatar (pulsing glowing circle for now as placeholder) */}
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-24 h-24 rounded-full bg-yellow-400/20 border border-yellow-400/50 shadow-[0_0_40px_rgba(250,204,21,0.4)] flex items-center justify-center mb-4">
+                  <Users className="w-10 h-10 text-yellow-300 animate-pulse" />
+                </div>
+                <div className="text-yellow-100 font-bold tracking-wider text-sm uppercase">{object.name[lang]}</div>
+                <div className="text-blue-200 text-[10px] mt-1">{t("Жасанды интеллект моделі қосылды", "ИИ-модель подключена")}</div>
+              </div>
+
+              {/* Fake audio waves */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-end gap-1 h-8">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="w-1 bg-yellow-400/60 rounded-t-sm" style={{ 
+                    height: `${Math.random() * 100}%`,
+                    animation: `pulse-height ${0.5 + Math.random()}s infinite alternate`
+                  }}></div>
+                ))}
+              </div>
+            </div>
+
+            {/* Chat interface */}
+            <div className="p-4 bg-gray-50 flex flex-col gap-3 h-48">
+              <div className="flex-1 bg-white rounded-xl p-3 border border-gray-100 shadow-sm overflow-y-auto text-sm text-gray-700">
+                <p className="mb-2"><span className="font-bold text-blue-600">AI {object.name[lang]}:</span> {lang === 'kk' ? "Сәлеметсіз бе! Мен тарих парақтарынан сөйлеп тұрмын. Маған сұрақ қойыңыз." : "Здравствуйте! Я говорю со страниц истории. Задайте мне вопрос."}</p>
+              </div>
+              
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder={t("Сұрақ қою...", "Задать вопрос...")}
+                  className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-400 text-sm"
+                />
+                <button className="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 flex items-center justify-center rounded-xl transition-colors">
+                  <MessageSquare className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            
+            <style jsx>{`
+              @keyframes pulse-height {
+                0% { height: 20%; }
+                100% { height: 100%; }
+              }
+            `}</style>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

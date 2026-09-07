@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoCulture AI - Жүктелуде...</title>
+    <!-- Автоматты түрде локальді серверге бағыттау -->
+    <meta http-equiv="refresh" content="2;url=http://localhost:3000">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FAF7F2;
+            color: #1e3a8a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #5C4A35;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+        .loader {
+            border: 4px solid rgba(196, 113, 79, 0.2);
+            border-left-color: #C4714F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #1A5F7A;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .warning {
+            background-color: #FFF8F0;
+            border: 1px solid #C4714F;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>GeoCulture AI</h1>
+    <div class="loader"></div>
+    <p>Платформа іске қосылуда... 2 секундтан кейін автоматты түрде ашылады.</p>
+    <p>Запуск платформы... Через 2 секунды откроется автоматически.</p>
+    
+    <a href="http://localhost:3000" class="btn">Қолмен ашу / Открыть вручную</a>
+
+    <div class="warning">
+        <strong>ЕСКЕРТУ / ВНИМАНИЕ:</strong><br><br>
+        Бұл Next.js жобасы болғандықтан, платформа жұмыс істеуі үшін сервер іске қосылуы керек. <br>
+        Егер бет ашылмаса, терминалда (Command Prompt) осы папканы ашып, <code>npm run dev</code> командасын жазыңыз.<br><br>
+        <em>Поскольку это проект на Next.js, для его работы должен быть запущен сервер. Если страница не открывается, откройте терминал в этой папке и запустите <code>npm run dev</code>.</em>
+    </div>
+</body>
+</html>

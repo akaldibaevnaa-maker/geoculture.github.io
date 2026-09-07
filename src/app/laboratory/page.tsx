@@ -1,27 +1,27 @@
 "use client";
 
-import { useState } from 'react';
-import { Beaker, ArrowRight, BrainCircuit, Activity, Zap, Target, Layers } from 'lucide-react';
-import { culturalObjects } from '@/data/objects';
-import { useLanguage } from '@/context/LanguageContext';
-import { CulturalObject } from '@/types';
+import { useState } from "react";
+import { Beaker, ArrowRight, BrainCircuit, Activity, Sparkles, Target, Search, CheckCircle2 } from "lucide-react";
+import { culturalObjects } from "@/data/objects";
+import { useLanguage } from "@/context/LanguageContext";
+import { CulturalObject } from "@/types";
 
 interface ResultItem extends CulturalObject {
   score: number;
 }
 
-const QUERIES = {
+const SAMPLE_QUERIES = {
   kk: [
-    'Туркестан, сәулет, тарих',
-    'Алматы, табиғат, шатқал',
-    'Сақ, скиф, петроглиф',
-    'Мангыстау, киелі орын',
+    "Түркістан кесенелері мен софылық мәдениет",
+    "Сақ дәуірінің алтын ескерткіштері мен обалары",
+    "ЮНЕСКО тізіміндегі жартас суреттері",
+    "Жібек жолы бойындағы ежелгі қалалар",
   ],
   ru: [
-    'Туркестан, архитектура, история',
-    'Алматы, природа, ущелье',
-    'Сакы, скифы, петроглифы',
-    'Мангистау, сакральное место',
+    "Мавзолеи Туркестана и суфийская культура",
+    "Золотые памятники и курганы сакской эпохи",
+    "Наскальные рисунки из списка ЮНЕСКО",
+    "Древние города вдоль Великого шёлкового пути",
   ],
 };
 
@@ -29,223 +29,160 @@ export default function LaboratoryPage() {
   const { lang, t } = useLanguage();
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<ResultItem[] | null>(null);
-  const [queryIdx, setQueryIdx] = useState(0);
+  const [customQuery, setCustomQuery] = useState("");
   const [steps, setSteps] = useState<string[]>([]);
 
-  const runExperiment = () => {
+  const runExperiment = (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
     setAnalyzing(true);
     setResult(null);
     setSteps([]);
 
-    const processingSteps = lang === 'kk'
-      ? ['NLP өңдеу...', 'Ұқсастық есептеу...', 'Гео-граф талдауы...', 'Рейтинг жасалуда...']
-      : ['Обработка NLP...', 'Вычисление Similarity Score...', 'Анализ гео-графов...', 'Формирование рейтинга...'];
+    const stepsList = lang === "kk" ? [
+      "Сұранысты векторлық талдау...",
+      "Семантикалық графпен салыстыру...",
+      "Тарихи дәуірлер мен санаттар бойынша салмақтау...",
+      "Ұсынылатын нысандарды рейтингтеу...",
+    ] : [
+      "Векторный анализ запроса...",
+      "Сопоставление с семантическим графом...",
+      "Взвешивание по эпохам и категориям...",
+      "Ранжирование рекомендуемых объектов...",
+    ];
 
-    let stepIndex = 0;
-    const stepInterval = setInterval(() => {
-      if (stepIndex < processingSteps.length) {
-        setSteps(prev => [...prev, processingSteps[stepIndex]]);
-        stepIndex++;
-      } else {
-        clearInterval(stepInterval);
-      }
-    }, 500);
+    stepsList.forEach((step, idx) => {
+      setTimeout(() => {
+        setSteps(prev => [...prev, step]);
+      }, (idx + 1) * 350);
+    });
 
     setTimeout(() => {
-      // Simulate smart matching: pick objects relevant to query
-      const query = QUERIES[lang][queryIdx].toLowerCase();
-      const keywords = query.split(/[,\s]+/).filter(w => w.length > 2);
-
+      const q = searchQuery.toLowerCase();
       const scored = culturalObjects.map(obj => {
-        let score = 50;
-        const searchable = [
-          obj.name[lang],
-          obj.description[lang],
-          obj.region[lang],
-          obj.category[lang],
-          ...obj.relatedPersons,
-        ].join(' ').toLowerCase();
-
-        keywords.forEach(kw => {
-          if (searchable.includes(kw)) score += 15;
+        let score = 60;
+        const text = `${obj.name[lang]} ${obj.description[lang]} ${obj.historicalSignificance[lang]} ${obj.period} ${obj.category[lang]}`.toLowerCase();
+        q.split(" ").forEach(word => {
+          if (word.length > 3 && text.includes(word)) score += 12;
         });
+        if (obj.unesco) score += 8;
+        return { ...obj, score: Math.min(score, 99) };
+      }).sort((a, b) => b.score - a.score).slice(0, 3);
 
-        score += Math.random() * 10; // slight randomness
-        return { ...obj, score: Math.min(99, Math.round(score)) };
-      });
-
-      const topResults = scored
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5) as ResultItem[];
-
-      setResult(topResults);
+      setResult(scored);
       setAnalyzing(false);
-    }, 2500);
+    }, 1800);
   };
 
-  const queries = QUERIES[lang];
-
   return (
-    <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Beaker className="text-kaz-blue w-8 h-8" />
-            {t('AI-Зертхана', 'AI-Лаборатория')}
+    <div className="min-h-full p-6 custom-scrollbar" style={{ background: "#FAF7F2" }}>
+      <div className="max-w-4xl mx-auto space-y-6">
+
+        {/* Header */}
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full text-xs font-bold"
+            style={{ background: "rgba(26,95,122,0.12)", color: "#1A5F7A", border: "1px solid rgba(26,95,122,0.2)" }}>
+            <Beaker className="w-3.5 h-3.5" />
+            {t("AI Зертханасы", "AI Лаборатория")}
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold" style={{ color: "#2C1F14" }}>
+            {t("Семантикалық іздеу & Ұсыныс гипотезасы", "Семантический поиск & Рекомендательные гипотезы")}
           </h1>
-          <p className="text-gray-400">
-            {t('Зияткерлік ұсыныс алгоритмдерінің жұмысын көрсету', 'Демонстрация работы алгоритмов интеллектуальных рекомендаций')}
+          <p className="text-xs max-w-xl mx-auto mt-1" style={{ color: "#8B6914" }}>
+            {t("Жасанды интеллект арқылы мәдени-тарихи нысандар арасындағы жасырын байланыстарды іздеу зертханасы", "Лаборатория поиска скрытых связей между историческими объектами с помощью AI")}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Experiment Input */}
+        <div className="rounded-2xl p-6 border space-y-4 shadow-sm" style={{ background: "#FFF8F0", borderColor: "rgba(196,113,79,0.2)" }}>
+          <h2 className="text-sm font-bold flex items-center gap-2" style={{ color: "#2C1F14" }}>
+            <BrainCircuit className="w-4 h-4" style={{ color: "#1A5F7A" }} />
+            {t("Гипотезаны енгізіңіз немесе үлгіні таңдаңыз", "Введите гипотезу или выберите пример")}
+          </h2>
 
-          {/* Input */}
-          <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Layers className="w-5 h-5 text-kaz-blue" />
-              {t('Кіріс деректер', 'Входные данные')}
-            </h2>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 w-4 h-4" style={{ color: "#8B6914" }} />
+              <input
+                type="text"
+                value={customQuery}
+                onChange={e => setCustomQuery(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && runExperiment(customQuery)}
+                placeholder={t("Сұранысты жазыңыз...", "Введите запрос...")}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-xs focus:outline-none"
+                style={{ background: "#FFF8F0", border: "1px solid rgba(196,113,79,0.25)", color: "#2C1F14" }}
+              />
+            </div>
+            <button onClick={() => runExperiment(customQuery)} disabled={analyzing || !customQuery.trim()}
+              className="px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all"
+              style={{ background: "#1A5F7A", color: "#fff", opacity: analyzing || !customQuery.trim() ? 0.6 : 1 }}>
+              {t("Талдау", "Анализировать")}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-            <div className="space-y-2 mb-4">
-              {queries.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => setQueryIdx(i)}
-                  className={`w-full text-left text-sm p-3 rounded-xl border transition-all ${
-                    queryIdx === i
-                      ? 'bg-kaz-blue/20 border-kaz-blue/50 text-white'
-                      : 'bg-black/20 border-white/5 text-gray-400 hover:border-white/20 hover:text-white'
-                  }`}
-                >
-                  <span className="text-[10px] text-kaz-gold uppercase font-bold block mb-0.5">
-                    {t('Сұрау', 'Запрос')} {i + 1}
-                  </span>
+          {/* Preset Prompts */}
+          <div className="space-y-1.5 pt-2">
+            <p className="text-[11px] font-semibold" style={{ color: "#8B6914" }}>{t("Дайын үлгілер:", "Готовые примеры:")}</p>
+            <div className="flex flex-wrap gap-2">
+              {(SAMPLE_QUERIES[lang === "kk" ? "kk" : "ru"] || SAMPLE_QUERIES.kk).map((q: string, i: number) => (
+                <button key={i} onClick={() => { setCustomQuery(q); runExperiment(q); }}
+                  className="text-xs px-3 py-1.5 rounded-lg text-left transition-all"
+                  style={{ background: "rgba(201,162,39,0.1)", border: "1px solid rgba(201,162,39,0.25)", color: "#8B6914" }}>
                   {q}
                 </button>
               ))}
             </div>
-
-            <div className="bg-black/30 p-4 rounded-xl border border-white/5 font-mono text-xs text-green-400 mb-4">
-              <p>{'{'}</p>
-              <p className="pl-4">"query": "{queries[queryIdx]}",</p>
-              <p className="pl-4">"algorithm": "cosine_similarity",</p>
-              <p className="pl-4">"top_k": 5</p>
-              <p>{'}'}</p>
-            </div>
-
-            <button
-              onClick={runExperiment}
-              disabled={analyzing}
-              className="w-full bg-kaz-blue/20 hover:bg-kaz-blue/40 border border-kaz-blue/50 text-kaz-blue font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Zap className="w-4 h-4" />
-              {t('Алгоритмді іске қосу', 'Запустить алгоритм')}
-            </button>
           </div>
+        </div>
 
-          {/* Processing */}
-          <div className="lg:col-span-3 flex flex-col items-center justify-center py-6 min-h-[300px]">
-            {analyzing ? (
-              <div className="flex flex-col items-center w-full">
-                <BrainCircuit className="w-14 h-14 text-kaz-gold mb-6 animate-pulse" />
-                <div className="w-full space-y-2">
-                  {steps.map((step, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-green-400 font-mono bg-black/30 px-3 py-1.5 rounded-lg animate-fade-in">
-                      <span className="text-green-500">▶</span> {step}
-                    </div>
-                  ))}
+        {/* Experiment Steps Log */}
+        {steps.length > 0 && (
+          <div className="rounded-2xl p-5 border space-y-2" style={{ background: "rgba(26,95,122,0.06)", borderColor: "rgba(26,95,122,0.18)" }}>
+            <h3 className="text-xs font-bold flex items-center gap-2" style={{ color: "#1A5F7A" }}>
+              <Activity className="w-3.5 h-3.5" />
+              {t("Алгоритмнің қадамдары", "Шаги алгоритма")}
+            </h3>
+            <div className="space-y-1.5">
+              {steps.map((step, idx) => (
+                <div key={idx} className="flex items-center gap-2 text-xs" style={{ color: "#2C1F14" }}>
+                  <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#2D6A4F" }} />
+                  <span>{step}</span>
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center opacity-25">
-                <BrainCircuit className="w-14 h-14 text-white mb-4" />
-                <ArrowRight className="w-8 h-8 text-white" />
-              </div>
-            )}
+              ))}
+            </div>
           </div>
+        )}
 
-          {/* Output */}
-          <div className="lg:col-span-5 bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-kaz-gold" />
-                {t('Нәтиже', 'Результат')}
-              </span>
-              {result && (
-                <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-md">
-                  {t('Табысты', 'Успешно')}
-                </span>
-              )}
-            </h2>
-
-            {!result && !analyzing && (
-              <div className="h-48 flex flex-col items-center justify-center text-gray-500 gap-2">
-                <Activity className="w-8 h-8 opacity-50" />
-                <p className="text-sm">{t('Іске қосуды күту...', 'Ожидание запуска...')}</p>
-              </div>
-            )}
-
-            {analyzing && (
-              <div className="h-48 flex items-center justify-center">
-                <Activity className="w-8 h-8 text-kaz-blue animate-bounce" />
-              </div>
-            )}
-
-            {result && (
-              <div className="space-y-3">
-                {result.map((item, i) => (
-                  <div key={item.id} className="bg-black/20 p-3 rounded-xl border border-white/5 relative overflow-hidden hover:border-white/15 transition-colors">
-                    <div
-                      className="absolute left-0 top-0 bottom-0 rounded-l-xl transition-all"
-                      style={{ width: `${item.score}%`, background: i === 0 ? 'rgba(245,158,11,0.1)' : 'rgba(14,165,233,0.08)' }}
-                    ></div>
-                    <div className="relative z-10 flex justify-between items-center">
-                      <div className="flex-1 mr-3">
-                        <p className="text-white font-medium text-sm">{item.name[lang]}</p>
-                        <p className="text-xs text-gray-400">{item.region[lang]}</p>
-                      </div>
-                      <div className="flex flex-col items-end shrink-0">
-                        <span className="text-[10px] text-gray-500">{t('Сәйкестік', 'Match')}</span>
-                        <span className={`font-bold text-sm ${i === 0 ? 'text-kaz-gold' : 'text-kaz-blue'}`}>
-                          {item.score}%
-                        </span>
-                      </div>
+        {/* Results */}
+        {result && (
+          <div className="space-y-3 animate-fade-in">
+            <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: "#2C1F14" }}>
+              <Sparkles className="w-4 h-4" style={{ color: "#C9A227" }} />
+              {t("AI Ұсыныстар нәтижесі", "Результаты AI-рекомендаций")}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {result.map(item => (
+                <div key={item.id} className="rounded-xl p-4 border flex flex-col justify-between"
+                  style={{ background: "#FFF8F0", borderColor: "rgba(196,113,79,0.2)" }}>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ background: "rgba(26,95,122,0.12)", color: "#1A5F7A" }}>
+                        {t("Сәйкестік", "Совпадение")} {item.score}%
+                      </span>
+                      {item.unesco && <span className="text-[9px] font-bold" style={{ color: "#C9A227" }}>UNESCO</span>}
                     </div>
+                    <h4 className="text-xs font-bold mb-1" style={{ color: "#2C1F14" }}>{item.name[lang]}</h4>
+                    <p className="text-[11px] line-clamp-2" style={{ color: "#5C4A35" }}>{item.description[lang]}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-        </div>
-
-        {/* Explanation block */}
-        <div className="mt-8 bg-kaz-blue/5 border border-kaz-blue/15 rounded-2xl p-6">
-          <h3 className="text-kaz-blue font-bold mb-3">
-            {t('Алгоритм қалай жұмыс істейді?', 'Как работает алгоритм?')}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-300">
-            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
-              <p className="text-white font-semibold mb-1">1. NLP {t('талдауы', 'анализ')}</p>
-              <p className="text-xs text-gray-400">
-                {t('Сұрауды сөздерге бөліп, маңызды кілт сөздерді анықтайды', 'Запрос разбивается на токены, выделяются ключевые слова')}
-              </p>
-            </div>
-            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
-              <p className="text-white font-semibold mb-1">2. {t('Векторлық ұқсастық', 'Векторное сходство')}</p>
-              <p className="text-xs text-gray-400">
-                {t('Нысандар мен сұрау арасындағы ұқсастық есептеледі', 'Вычисляется косинусное сходство между запросом и объектами')}
-              </p>
-            </div>
-            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
-              <p className="text-white font-semibold mb-1">3. {t('Гео-граф оңтайландыру', 'Гео-граф оптимизация')}</p>
-              <p className="text-xs text-gray-400">
-                {t('Нәтижелер географиялық орналасымы бойынша оңтайландырылады', 'Результаты оптимизируются с учётом географического расположения')}
-              </p>
+                  <div className="mt-3 pt-2 border-t text-[10px] flex justify-between" style={{ borderColor: "rgba(196,113,79,0.1)", color: "#8B6914" }}>
+                    <span>📍 {item.region[lang]}</span>
+                    <span>⏳ {item.period}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>

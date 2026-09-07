@@ -10,18 +10,34 @@ import Link from "next/link";
 export default function TimelinePage() {
   const { lang, t } = useLanguage();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
   const selectedPeriod = HISTORICAL_PERIODS.find(p => p.id === selectedId) || null;
 
   const relatedObjects = selectedPeriod
-    ? selectedPeriod.relatedObjectIds.length > 0
+    ? (selectedPeriod.relatedObjectIds && selectedPeriod.relatedObjectIds.length > 0)
       ? culturalObjects.filter(o => selectedPeriod.relatedObjectIds.includes(o.id))
       : culturalObjects.filter(o => {
-          const desc = o.description[lang].toLowerCase() + o.historicalSignificance[lang].toLowerCase();
-          const keywords = selectedPeriod.title[lang].toLowerCase().split(" ").filter(w => w.length > 3);
-          return keywords.some(kw => desc.includes(kw));
+          const descText = o.description[lang] || "";
+          const histText = o.historicalSignificance ? (o.historicalSignificance[lang] || "") : "";
+          const desc = descText.toLowerCase() + histText.toLowerCase();
+          const titleText = selectedPeriod.title ? (selectedPeriod.title[lang] || "") : "";
+          const keywords = titleText.toLowerCase().split(" ").filter((w: string) => w.length > 3);
+          return keywords.some((kw: string) => desc.includes(kw));
         }).slice(0, 4)
     : [];
+
+  const handleAiSummary = (period: any) => {
+    setIsGeneratingAi(true);
+    // Simulate AI generation time
+    setTimeout(() => {
+      const summaryKk = `Бұл кезең Қазақстан үшін өте маңызды болды. ${period.title.kk} кезіндегі оқиғалар қазіргі ұлттық болмыстың қалыптасуына үлкен әсер етті. Экономикалық және мәдени байланыстар дамыды.`;
+      const summaryRu = `Этот период стал критически важным для Казахстана. События эпохи "${period.title.ru}" оказали огромное влияние на формирование современной национальной идентичности. Развивались экономические и культурные связи.`;
+      setAiSummary(lang === 'kk' ? summaryKk : summaryRu);
+      setIsGeneratingAi(false);
+    }, 1500);
+  };
 
   return (
     <div className="min-h-full" style={{ background: "#FAF7F2" }}>
@@ -34,7 +50,7 @@ export default function TimelinePage() {
             <Clock className="w-3.5 h-3.5" />
             {t("Тарихи лента", "Историческая лента")}
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-3" style={{ color: "#2C1F14" }}>
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-3" style={{ color: "#1e3a8a" }}>
             {t("Қазақстан тарихы", "История Казахстана")}
           </h1>
           <p className="text-sm max-w-xl mx-auto" style={{ color: "#8B6914" }}>
@@ -69,7 +85,7 @@ export default function TimelinePage() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-xs font-bold leading-tight" style={{ color: isSelected ? period.color : "#2C1F14" }}>
+                          <p className="text-xs font-bold leading-tight" style={{ color: isSelected ? period.color : "#1e3a8a" }}>
                             {period.title[lang]}
                           </p>
                           <p className="text-[10px] mt-0.5" style={{ color: "#A08060" }}>{period.years}</p>
@@ -115,7 +131,7 @@ export default function TimelinePage() {
                       {selectedPeriod.years}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-extrabold mb-2" style={{ color: "#2C1F14" }}>
+                  <h2 className="text-2xl font-extrabold mb-2" style={{ color: "#1e3a8a" }}>
                     {selectedPeriod.title[lang]}
                   </h2>
                   <p className="text-sm leading-relaxed" style={{ color: "#5C4A35" }}>
@@ -128,7 +144,7 @@ export default function TimelinePage() {
                   {/* Key events */}
                   {selectedPeriod.events.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: "#2C1F14" }}>
+                      <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: "#1e3a8a" }}>
                         <Swords className="w-4 h-4" style={{ color: selectedPeriod.color }} />
                         {t("Негізгі оқиғалар", "Ключевые события")}
                       </h3>
@@ -146,7 +162,7 @@ export default function TimelinePage() {
                   {/* Historical persons */}
                   {selectedPeriod.persons.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: "#2C1F14" }}>
+                      <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: "#1e3a8a" }}>
                         <Users className="w-4 h-4" style={{ color: "#8B3A8B" }} />
                         {t("Тарихи тұлғалар", "Исторические личности")}
                       </h3>
@@ -164,7 +180,7 @@ export default function TimelinePage() {
                   {/* Related cultural objects */}
                   {relatedObjects.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: "#2C1F14" }}>
+                      <h3 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: "#1e3a8a" }}>
                         <Star className="w-4 h-4" style={{ color: "#C9A227" }} />
                         {t("Байланысты тарихи нысандар", "Связанные исторические объекты")}
                       </h3>
@@ -173,7 +189,7 @@ export default function TimelinePage() {
                           <Link key={obj.id} href={`/objects/${obj.id}`}
                             className="p-3 rounded-xl block transition-all hover:shadow-md"
                             style={{ background: "rgba(245,239,230,0.8)", border: "1px solid rgba(196,113,79,0.15)" }}>
-                            <p className="text-xs font-bold mb-0.5" style={{ color: "#2C1F14" }}>{obj.name[lang]}</p>
+                            <p className="text-xs font-bold mb-0.5" style={{ color: "#1e3a8a" }}>{obj.name[lang]}</p>
                             <p className="text-[10px]" style={{ color: "#8B6914" }}>{obj.period}</p>
                             <p className="text-[11px] mt-1 line-clamp-2" style={{ color: "#5C4A35" }}>{obj.description[lang]}</p>
                             {obj.unesco && <span className="inline-block mt-1.5 text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ background: "rgba(201,162,39,0.15)", color: "#8B6914" }}>UNESCO</span>}
@@ -192,13 +208,13 @@ export default function TimelinePage() {
                       return (
                         <>
                           {prev ? (
-                            <button onClick={() => setSelectedId(prev.id)} className="flex items-center gap-1 text-xs transition-colors"
+                            <button onClick={() => { setSelectedId(prev.id); setAiSummary(null); }} className="flex items-center gap-1 text-xs transition-colors"
                               style={{ color: "#8B6914" }}>
                               ← {prev.title[lang]}
                             </button>
                           ) : <div />}
                           {next ? (
-                            <button onClick={() => setSelectedId(next.id)} className="flex items-center gap-1 text-xs transition-colors"
+                            <button onClick={() => { setSelectedId(next.id); setAiSummary(null); }} className="flex items-center gap-1 text-xs transition-colors"
                               style={{ color: "#8B6914" }}>
                               {next.title[lang]} →
                             </button>
@@ -206,6 +222,38 @@ export default function TimelinePage() {
                         </>
                       );
                     })()}
+                  </div>
+
+                  {/* AI Analysis */}
+                  <div className="mt-6 border-t pt-4" style={{ borderColor: "rgba(196,113,79,0.1)" }}>
+                    {!aiSummary ? (
+                      <button 
+                        onClick={() => handleAiSummary(selectedPeriod)}
+                        disabled={isGeneratingAi}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl transition-colors font-bold text-sm"
+                        style={{ background: "rgba(26,95,122,0.1)", color: "#1A5F7A", border: "1px solid rgba(26,95,122,0.2)" }}
+                      >
+                        {isGeneratingAi ? (
+                          <div className="flex gap-1 items-center">
+                            <span className="w-2 h-2 rounded-full bg-[#1A5F7A] animate-ping"></span>
+                            {t("AI талдау жасауда...", "AI проводит анализ...")}
+                          </div>
+                        ) : (
+                          <>
+                            <Star className="w-4 h-4" />
+                            {t("AI Тарихи Талдау", "AI Исторический Анализ")}
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <div className="p-4 rounded-xl relative" style={{ background: "rgba(255,248,240,0.8)", border: "1px solid rgba(201,162,39,0.3)" }}>
+                        <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
+                          <span className="bg-yellow-400 text-yellow-900 text-[9px] font-bold px-2 py-1 rounded-full uppercase">AI Generated</span>
+                        </div>
+                        <h4 className="font-bold text-sm mb-2" style={{ color: "#1e3a8a" }}>{t("Жасанды Интеллекттің қорытындысы", "Вывод Искусственного Интеллекта")}</h4>
+                        <p className="text-xs leading-relaxed text-gray-700">{aiSummary}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

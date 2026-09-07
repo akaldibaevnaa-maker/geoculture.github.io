@@ -102,6 +102,10 @@ export default function MapComponent() {
   const [flyTarget, setFlyTarget] = useState<{ coords: [number, number]; zoom: number } | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  // New: Active data layers
+  const [activeLayers, setActiveLayers] = useState<string[]>(['heritage', 'folklore', 'persons', 'nature', 'silk_road']);
+  
   const searchRef = useRef<HTMLDivElement>(null);
 
   const allSuggestions = useRef<SearchSuggestion[]>([]);
@@ -113,15 +117,72 @@ export default function MapComponent() {
 
   const types = Array.from(new Set(culturalObjects.map(o => o.objectType)));
 
+  const toggleLayer = (layer: string) => {
+    setActiveLayers(prev => 
+      prev.includes(layer) ? prev.filter(l => l !== layer) : [...prev, layer]
+    );
+  };
+
+  const getObjectLayer = (objType: string): string => {
+    if (["monument", "archaeology", "historical_city", "ancient_city", "museum", "mausoleum"].includes(objType)) return "heritage";
+    if (["sacred", "petroglyphs"].includes(objType)) return "folklore";
+    if (["person"].includes(objType)) return "persons";
+    if (["nature"].includes(objType)) return "nature";
+    return "heritage"; // fallback
+  };
+
+  const [timeValue, setTimeValue] = useState<number>(100);
+
+  const getYearFromValue = (val: number) => {
+    if (val === 100) return 9999;
+    if (val < 25) return -2000 + (val / 25) * 3100; // up to 1100
+    if (val < 50) return 1100 + ((val - 25) / 25) * 400; // up to 1500
+    if (val < 75) return 1500 + ((val - 50) / 25) * 400; // up to 1900
+    return 1900 + ((val - 75) / 25) * 126; // up to 2026
+  };
+
+  const getObjectYear = (obj: CulturalObject) => {
+    const p = obj.period.toLowerCase();
+    if (p.includes("миллион")) return -1000000;
+    if (p.includes("б.з.д") || p.includes("до н.э") || p.includes("мыңжылдық") || p.includes("ежелден")) return -5000;
+    if (p.includes("xix") || p.includes("19-") || p.includes("18")) return 1850;
+    if (p.includes("xviii") || p.includes("18-")) return 1750;
+    if (p.includes("xvii") || p.includes("17-")) return 1650;
+    if (p.includes("xvi") || p.includes("16-")) return 1550;
+    if (p.includes("xv") || p.includes("xiv") || p.includes("14") || p.includes("1390") || p.includes("13-")) return 1450;
+    if (p.includes("xiii")) return 1250;
+    if (p.includes("xii") || p.includes("xi") || p.includes("11-") || p.includes("12-")) return 1150;
+    if (p.includes("x") || p.includes("ix") || p.includes("viii") || p.includes("vii") || p.includes("872")) return 900;
+    if (p.includes("199") || p.includes("20") || p.includes("қазіргі") || p.includes("современ")) return 1995;
+    return 1900; // fallback
+  };
+
+  const getEraLabel = (val: number) => {
+    if (val === 100) return { kk: "Барлық ғасырлар", ru: "Все века", en: "All centuries" };
+    const y = getYearFromValue(val);
+    if (y < 0) return { kk: "Б.з.д. дәуір (Ежелгі)", ru: "До н.э. (Древность)", en: "BC (Ancient Era)" };
+    if (y < 1200) return { kk: "Ерте орта ғасырлар", ru: "Раннее Средневековье", en: "Early Middle Ages" };
+    if (y < 1600) return { kk: "Алтын Орда & Қазақ хандығы", ru: "Золотая Орда и Казахское ханство", en: "Golden Horde & Kazakh Khanate" };
+    if (y < 1900) return { kk: "XVIII - XIX ғасырлар", ru: "XVIII - XIX века", en: "18th - 19th Centuries" };
+    return { kk: "ХХ ғасыр - Қазіргі заман", ru: "ХХ век - Современность", en: "20th Century - Present" };
+  };
+
   const filteredObjects = culturalObjects.filter(obj => {
     const query = searchQuery.toLowerCase();
+    const nameStr = (obj.name && obj.name[lang]) || "";
+    const regionStr = (obj.region && obj.region[lang]) || "";
+    const catStr = (obj.category && obj.category[lang]) || "";
     const matchesSearch =
       !query ||
-      obj.name[lang].toLowerCase().includes(query) ||
-      obj.region[lang].toLowerCase().includes(query) ||
-      obj.category[lang].toLowerCase().includes(query);
+      nameStr.toLowerCase().includes(query) ||
+      regionStr.toLowerCase().includes(query) ||
+      catStr.toLowerCase().includes(query);
+      
     const matchesType = !filterType || obj.objectType === filterType;
-    return matchesSearch && matchesType;
+    const matchesLayer = activeLayers.includes(getObjectLayer(obj.objectType));
+    const matchesTime = getObjectYear(obj) <= getYearFromValue(timeValue);
+    
+    return matchesSearch && matchesType && matchesLayer && matchesTime;
   });
 
   const handleSearchInput = (val: string) => {
@@ -215,14 +276,24 @@ export default function MapComponent() {
               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#C4714F" }}></span>
               <span className="text-sm font-bold" style={{ color: "#2C1F14" }}>GeoCulture AI</span>
             </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors"
-              style={{ background: showFilters ? "rgba(196,113,79,0.15)" : "transparent", color: "#C4714F" }}
-            >
-              <Filter className="w-3 h-3" />
-              {t("Сүзгі", "Фильтр")}
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Spatial Audio Toggle */}
+              <button 
+                className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg transition-colors border tooltip"
+                title={t("Кеңістіктік дыбыс (Слойға байланысты)", "Пространственный звук (Зависит от слоя)")}
+                style={{ background: "rgba(45,106,79,0.1)", color: "#2D6A4F", borderColor: "rgba(45,106,79,0.2)" }}
+              >
+                🔊 {t("Дыбыс", "Звук")}
+              </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors"
+                style={{ background: showFilters ? "rgba(196,113,79,0.15)" : "transparent", color: "#C4714F" }}
+              >
+                <Filter className="w-3 h-3" />
+                {t("Сүзгі", "Фильтр")}
+              </button>
+            </div>
           </div>
 
           {/* Search */}
@@ -266,10 +337,73 @@ export default function MapComponent() {
             )}
           </div>
 
-          {/* Filters (collapsible) */}
+          {/* Filters & Layers (collapsible) */}
           {showFilters && (
-            <div className="px-3 pb-3 space-y-2 border-t" style={{ borderColor: "rgba(196,113,79,0.1)" }}>
+            <div className="px-3 pb-3 space-y-3 border-t" style={{ borderColor: "rgba(196,113,79,0.1)" }}>
+              {/* Layers Section */}
               <div className="pt-2">
+                <p className="text-[10px] font-bold uppercase mb-2 tracking-wider" style={{ color: "#A08060" }}>
+                  {t("Деректер қабаттары", "Слои данных")}
+                </p>
+                <div className="grid grid-cols-1 gap-1.5">
+                  <button 
+                    onClick={() => toggleLayer('heritage')}
+                    className={`flex items-center justify-between px-2 py-1.5 rounded-lg border transition-colors ${activeLayers.includes('heritage') ? 'bg-orange-50 border-orange-200' : 'bg-white border-gray-100 opacity-60'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px]">🏛️</span>
+                      <span className="text-xs font-semibold text-[#2C1F14]">{t("Тарихи мұра", "Наследие")}</span>
+                    </div>
+                    <div className="w-3 h-3 rounded-sm bg-[#C4714F]"></div>
+                  </button>
+                  <button 
+                    onClick={() => toggleLayer('folklore')}
+                    className={`flex items-center justify-between px-2 py-1.5 rounded-lg border transition-colors ${activeLayers.includes('folklore') ? 'bg-purple-50 border-purple-200' : 'bg-white border-gray-100 opacity-60'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px]">🐉</span>
+                      <span className="text-xs font-semibold text-[#2C1F14]">{t("Фольклор", "Фольклор")}</span>
+                    </div>
+                    <div className="w-3 h-3 rounded-sm bg-[#8B3A8B]"></div>
+                  </button>
+                  <button 
+                    onClick={() => toggleLayer('persons')}
+                    className={`flex items-center justify-between px-2 py-1.5 rounded-lg border transition-colors ${activeLayers.includes('persons') ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-100 opacity-60'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px]">👤</span>
+                      <span className="text-xs font-semibold text-[#2C1F14]">{t("Тұлғалар", "Личности")}</span>
+                    </div>
+                    <div className="w-3 h-3 rounded-sm bg-[#C9A227]"></div>
+                  </button>
+                  <button 
+                    onClick={() => toggleLayer('silk_road')}
+                    className={`flex items-center justify-between px-2 py-1.5 rounded-lg border transition-colors ${activeLayers.includes('silk_road') ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-100 opacity-60'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px]">🐪</span>
+                      <span className="text-xs font-semibold text-[#2C1F14]">{t("Жібек жолы", "Шелковый путь")}</span>
+                    </div>
+                    <div className="w-3 h-3 rounded-sm bg-[#1A5F7A]"></div>
+                  </button>
+                  <button 
+                    onClick={() => toggleLayer('nature')}
+                    className={`flex items-center justify-between px-2 py-1.5 rounded-lg border transition-colors ${activeLayers.includes('nature') ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100 opacity-60'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px]">🏔️</span>
+                      <span className="text-xs font-semibold text-[#2C1F14]">{t("Табиғат", "Природа")}</span>
+                    </div>
+                    <div className="w-3 h-3 rounded-sm bg-[#2D6A4F]"></div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Classic Type Filter */}
+              <div className="pt-2 border-t" style={{ borderColor: "rgba(196,113,79,0.1)" }}>
+                <p className="text-[10px] font-bold uppercase mb-2 tracking-wider" style={{ color: "#A08060" }}>
+                  {t("Нысан түрі", "Тип объекта")}
+                </p>
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
@@ -282,16 +416,6 @@ export default function MapComponent() {
                   ))}
                 </select>
               </div>
-
-              {/* Legend */}
-              <div className="grid grid-cols-2 gap-1 pt-1">
-                {Object.entries(TYPE_LABELS).slice(0, 8).map(([type, label]) => (
-                  <div key={type} className="flex items-center gap-1.5 text-[10px]" style={{ color: "#8B6914" }}>
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: TYPE_STYLES[type]?.bg || "#888" }}></div>
-                    <span className="truncate">{label[lang]}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
@@ -299,6 +423,38 @@ export default function MapComponent() {
           <div className="px-4 py-2 border-t text-[11px]" style={{ borderColor: "rgba(196,113,79,0.1)", color: "#A08060" }}>
             <span style={{ color: "#C4714F", fontWeight: 700 }}>{filteredObjects.length}</span>
             {t(" нысан табылды", " объектов найдено")}
+          </div>
+        </div>
+      </div>
+
+      {/* Time Slider (Машина времени) */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 w-[90%] max-w-2xl">
+        <div className="bg-white/95 backdrop-blur-sm border border-orange-200 shadow-xl rounded-2xl px-6 py-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⏳</span>
+              <h3 className="text-sm font-bold text-[#1e3a8a]">
+                {t("Уақыт машинасы", "Машина времени")}
+              </h3>
+            </div>
+            <div className="text-xs font-semibold px-2 py-1 bg-orange-100 text-orange-800 rounded-md">
+              {getEraLabel(timeValue)[lang as 'kk'|'ru'|'en']}
+            </div>
+          </div>
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            value={timeValue}
+            onChange={(e) => setTimeValue(Number(e.target.value))}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#C4714F]"
+          />
+          <div className="flex justify-between text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-wide">
+            <span>{t("Б.з.д.", "До н.э.")}</span>
+            <span>XI ғ.</span>
+            <span>XV ғ.</span>
+            <span>XIX ғ.</span>
+            <span>{t("Қазіргі", "Наше время")}</span>
           </div>
         </div>
       </div>

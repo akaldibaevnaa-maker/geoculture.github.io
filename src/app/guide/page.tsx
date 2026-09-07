@@ -57,6 +57,13 @@ function GuideContent() {
     { id: "1", sender: "ai", text: getWelcomeText("kk"), timestamp: Date.now() }
   ]);
   const [input, setInput] = useState("");
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem('openai_api_key');
+    if (saved) setApiKey(saved);
+  }, []);
 
   useEffect(() => {
     setMessages(prev => [
@@ -97,6 +104,7 @@ function GuideContent() {
           history: messages.slice(-10),
           lang,
           objectContext: selectedObject ? selectedObject.name[lang] : undefined,
+          clientApiKey: apiKey,
         }),
       });
 
@@ -152,7 +160,7 @@ function GuideContent() {
             </span>}
           </p>
         </div>
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(196,113,79,0.08)", border: "1px solid rgba(196,113,79,0.15)" }}>
+        <div className="flex gap-1 p-1 rounded-xl items-center" style={{ background: "rgba(196,113,79,0.08)", border: "1px solid rgba(196,113,79,0.15)" }}>
           {(Object.entries(MODES) as [AiMode, { kk: string; ru: string }][]).map(([key, label]) => (
             <button key={key} onClick={() => setMode(key)}
               className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
@@ -160,8 +168,57 @@ function GuideContent() {
               {label[lang]}
             </button>
           ))}
+          <div className="w-px h-4 bg-[#8B6914] opacity-20 mx-1"></div>
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="p-1.5 rounded-lg transition-colors hover:bg-orange-100 tooltip"
+            title={t("ChatGPT баптаулары", "Настройки ChatGPT")}
+            style={{ color: apiKey ? "#2D6A4F" : "#C4714F" }}
+          >
+            <Sparkles className="w-4 h-4" />
+          </button>
         </div>
       </div>
+
+      {/* ChatGPT Settings Modal */}
+      {showSettings && (
+        <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-orange-200">
+            <h2 className="text-lg font-bold text-[#1e3a8a] mb-2">{t("ChatGPT қосу", "Подключение ChatGPT")}</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              {t(
+                "Жасанды интеллектті тікелей қосу үшін OpenAI API кілтін енгізіңіз.",
+                "Введите ваш ключ OpenAI API, чтобы напрямую подключить ChatGPT."
+              )}
+            </p>
+            <input 
+              type="password" 
+              value={apiKey} 
+              onChange={e => setApiKey(e.target.value)} 
+              placeholder="sk-..."
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:border-blue-500"
+            />
+            <div className="flex justify-end gap-2">
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200"
+              >
+                {t("Жабу", "Закрыть")}
+              </button>
+              <button 
+                onClick={() => {
+                  if(apiKey) localStorage.setItem('openai_api_key', apiKey);
+                  else localStorage.removeItem('openai_api_key');
+                  setShowSettings(false);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#1A5F7A] text-white hover:bg-opacity-90"
+              >
+                {t("Сақтау", "Сохранить")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Prompts */}
       <div className="px-4 py-2 flex gap-2 overflow-x-auto custom-scrollbar border-b" style={{ borderColor: "rgba(196,113,79,0.08)" }}>
@@ -254,10 +311,19 @@ function GuideContent() {
   );
 }
 
-export default function GuidePage() {
+import dynamic from 'next/dynamic';
+
+// Rename the original component to GuideMainComponent to avoid naming conflicts
+const GuideMainComponent = function GuideMainComponent() {
   return (
     <Suspense fallback={<div className="flex-1 flex items-center justify-center" style={{ color: "#8B6914" }}>Жүктелуде...</div>}>
       <GuideContent />
     </Suspense>
   );
+};
+
+const GuidePageDynamic = dynamic(() => Promise.resolve(GuideMainComponent), { ssr: false });
+
+export default function GuidePage() {
+  return <GuidePageDynamic />;
 }
